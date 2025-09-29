@@ -1,9 +1,12 @@
+import Navbar from "@/components/layout/Navbar";
 import Container from "@/components/layout/Container";
 import Section from "@/components/layout/Section";
 import Button from "@/components/ui/Button";
 
 export default function LandingPage() {
   return (
+    <>
+    <Navbar/>
     <main className="min-h-dvh">
       {/* 히어로 */}
       <Section className="bg-gradient-to-b from-white to-neutral-50 dark:from-neutral-900 dark:to-neutral-950">
@@ -50,5 +53,6 @@ export default function LandingPage() {
         </Container>
       </Section>
     </main>
+    </>
   );
 }
