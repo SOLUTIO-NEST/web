@@ -1,9 +1,8 @@
-import Button from "@/components/ui/Button";
 import GraphBackground from "@/features/land/components/GraphBackground";
 import { InlineMath } from "react-katex";
 export default function Hero() {
   return (
-    <section className="relative h-[calc(100dvh-64px)] overflow-hidden bg-gradient-to-b from-white to-neutral-50">
+    <section className="relative overflow-hidden bg-gradient-to-b from-white to-neutral-50 h-[calc(100svh-80px)] md:h-[calc(100svh-64px-70px)]  ">
       {/* 🔹 배경 그래프 */}
       <GraphBackground />
 
