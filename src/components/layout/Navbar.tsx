@@ -3,7 +3,7 @@ import Button from "@/components/ui/Button";
 
 export default function Navbar() {
   return (
-    <header className="sticky top-0 z-50 border-b bg-white/90 dark:bg-neutral-900/80 backdrop-blur">
+    <header className="sticky top-0 z-50 bg-white/90 dark:bg-neutral-900/80 backdrop-blur shadow-sm">
       <Container className="flex h-16 items-center justify-between gap-6">
         {/* 좌측: 로고 + 브랜드명 */}
         <a href="/" className="flex items-center gap-3">
