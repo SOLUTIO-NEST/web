@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+/* 선택: 레이아웃 초기화 최소한만 */
+@layer base {
+  html, body, #root { height: 100%; }
+  body { margin: 0; }
+}
