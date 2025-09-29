@@ -3,8 +3,8 @@ import Button from "@/components/ui/Button";
 
 export default function Navbar() {
   return (
-    <header className="sticky top-0 z-50 bg-white/90 dark:bg-neutral-900/80 backdrop-blur shadow-sm">
-      <Container fluid pad="sm" className="flex h-14 items-center justify-between gap-4">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 dark:bg-neutral-900/80 backdrop-blur shadow-sm h-16">      
+      <Container fluid pad="sm" className="flex h-16 items-center justify-between gap-4">
         {/* 좌측: 로고 + 브랜드명 */}
         <a href="/" className="flex items-center gap-3">
           {/* 로고 이미지 경로는 프로젝트에 맞게 교체하세요 */}
@@ -15,7 +15,7 @@ export default function Navbar() {
         </a>
 
         {/* 가운데: 메뉴 (간단 드롭다운 형태) */}
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden md:flex items-center gap-40">
           <DetailsMenu label="소개">
             <a className="dropdown-item" href="#">동아리 소개</a>
             <a className="dropdown-item" href="#">연혁</a>
@@ -23,12 +23,12 @@ export default function Navbar() {
 
           <DetailsMenu label="활동">
             <a className="dropdown-item" href="#">스터디</a>
-            <a className="dropdown-item" href="#">프로젝트</a>
+            <a className="dropdown-item" href="#">대회</a>
           </DetailsMenu>
         </nav>
 
         {/* 우측: 버튼들 */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Button variant="brandSoft" size="sm" className="shadow">
             로그인
           </Button>
