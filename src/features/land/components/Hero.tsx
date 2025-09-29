@@ -13,10 +13,6 @@ export default function Hero() {
             O(<InlineMath math="n^n" />)같은 인생,<br className="hidden md:block" />
             O(<InlineMath math="1" />)로 바꿔보자
         </h1>
-        <div className="mt-8 flex gap-3">
-          <Button variant="brand" size="lg">Get Started</Button>
-          <Button variant="brandSoft" size="lg">Learn more</Button>
-        </div>
       </div>
 
       <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-6 md:bottom-8">
