@@ -4,7 +4,7 @@ import Button from "@/components/ui/Button";
 export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 bg-white/90 dark:bg-neutral-900/80 backdrop-blur shadow-sm">
-      <Container className="flex h-16 items-center justify-between gap-6">
+      <Container fluid pad="sm" className="flex h-14 items-center justify-between gap-4">
         {/* 좌측: 로고 + 브랜드명 */}
         <a href="/" className="flex items-center gap-3">
           {/* 로고 이미지 경로는 프로젝트에 맞게 교체하세요 */}
