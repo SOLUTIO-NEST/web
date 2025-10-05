@@ -31,7 +31,7 @@ export default function SignupPage() {
             <label className="block text-sm font-semibold mb-2">학번</label>
             <input
               type="text"
-              placeholder="202599999"
+              placeholder="2025xxxxx"
               className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-400 outline-none"
             />
           </div>
@@ -52,9 +52,21 @@ export default function SignupPage() {
             <input
               type="tel"
               placeholder="010-1234-5678"
+              maxLength={13} // 010-1234-5678 형태 기준
+              onChange={(e) => {
+                let value = e.target.value.replace(/[^0-9]/g, ""); // 숫자만 남기기
+                if (value.length < 4) {
+                  e.target.value = value;
+                } else if (value.length < 8) {
+                  e.target.value = `${value.slice(0, 3)}-${value.slice(3)}`;
+                } else {
+                  e.target.value = `${value.slice(0, 3)}-${value.slice(3, 7)}-${value.slice(7, 11)}`;
+                }
+              }}
               className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-400 outline-none"
             />
           </div>
+
 
           {/* 백준 아이디 */}
           <div>
@@ -66,18 +78,8 @@ export default function SignupPage() {
             />
           </div>
 
-          {/* 디스코드 아이디 */}
-          <div>
-            <label className="block text-sm font-semibold mb-2">디스코드 아이디</label>
-            <input
-              type="text"
-              placeholder="sowl#1234"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-400 outline-none"
-            />
-          </div>
-
           {/* 메인 언어 */}
-          <div className="md:col-span-2">
+          <div>
             <label className="block text-sm font-semibold mb-2">메인 언어 (하나만 선택)</label>
             <select
               className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-400 outline-none"
