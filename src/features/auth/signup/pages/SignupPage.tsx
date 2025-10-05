@@ -151,30 +151,31 @@ export default function SignupPage() {
                 {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
               </div>
 
-              {/* 비밀번호 */}
-              <div className="relative">
+              {/* 비밀번호 입력 */}
+              <div>
                 <label className="block text-sm font-semibold mb-2">비밀번호</label>
-                <input
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  value={form.password}
-                  onChange={handleChange}
-                  placeholder="비밀번호를 입력하세요"
-                  className={`w-full border rounded-lg px-4 py-2 pr-10 focus:ring-2 outline-none ${
-                    errors.password
-                      ? "border-red-400 focus:ring-red-300"
-                      : "border-gray-300 focus:ring-purple-400"
-                  }`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-[70%] -translate-y-1/2 text-gray-500 hover:text-purple-600 transition"
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-                {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="비밀번호를 입력하세요"
+                    className={`w-full border ${
+                      errors.password ? "border-red-400" : "border-gray-300"
+                    } rounded-lg px-4 py-2 pr-10 focus:ring-2 focus:ring-purple-400 outline-none`}
+                  />
+                  {/* 👁 아이콘 버튼 */}
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-purple-600 transition"
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
+                {errors.password && (
+                  <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+                )}
               </div>
+
 
               {/* 소속학과 */}
               <div>
@@ -263,33 +264,34 @@ export default function SignupPage() {
               </div>
 
               {/* 메인 언어 */}
-              <div className="relative">
+              <div>
                 <label className="block text-sm font-semibold mb-2">메인 언어</label>
-                <select
-                  name="language"
-                  value={form.language}
-                  onChange={handleChange}
-                  className={`w-full appearance-none border rounded-lg px-4 py-2 pr-10 focus:ring-2 outline-none ${
-                    errors.language
-                      ? "border-red-400 focus:ring-red-300"
-                      : "border-gray-300 focus:ring-purple-400"
-                  }`}
-                >
-                  <option value="" disabled className="text-gray-400">
-                    선택하세요
-                  </option>
-                  <option>C</option>
-                  <option>C++</option>
-                  <option>Java</option>
-                  <option>Python</option>
-                  <option>JavaScript</option>
-                </select>
-                <ChevronDown
-                  size={18}
-                  className="absolute right-3 top-[70%] -translate-y-1/2 text-gray-500 pointer-events-none"
-                />
-                {errors.language && <p className="text-red-500 text-xs mt-1">{errors.language}</p>}
+                <div className="relative">
+                  <select
+                    className={`w-full appearance-none border ${
+                      errors.language ? "border-red-400" : "border-gray-300"
+                    } rounded-lg px-4 py-2 pr-10 focus:ring-2 focus:ring-purple-400 outline-none`}
+                    defaultValue=""
+                  >
+                    <option value="" disabled className="text-gray-400">
+                      선택하세요
+                    </option>
+                    <option>C</option>
+                    <option>C++</option>
+                    <option>Java</option>
+                    <option>Python</option>
+                    <option>JavaScript</option>
+                  </select>
+                  <ChevronDown
+                    size={18}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"
+                  />
+                </div>
+                {errors.language && (
+                  <p className="text-red-500 text-xs mt-1">{errors.language}</p>
+                )}
               </div>
+
 
               {/* 제출 버튼 */}
               <div className="md:col-span-2 flex justify-center mt-6">
