@@ -2,32 +2,122 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import { motion, AnimatePresence } from "framer-motion";
-import { Eye, EyeOff, ChevronDown } from "lucide-react"; 
+import { Eye, EyeOff, ChevronDown } from "lucide-react";
 
 export default function SignupPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
+  // ✅ 모든 입력 값 상태
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+    department: "",
+    studentId: "",
+    name: "",
+    phone: "",
+    baekjoon: "",
+    language: "",
+  });
+
+  // ✅ 에러 상태
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
+    department: "",
+    studentId: "",
+    name: "",
+    phone: "",
+    baekjoon: "",
+    language: "",
+  });
+
+  // ✅ 실시간 검증 로직
+  const validateField = (name: string, value: string) => {
+  let error = "";
+
+  switch (name) {
+    case "email":
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
+        error = "올바른 이메일 형식이 아닙니다.";
+      break;
+
+    case "password":
+      if (
+        value.length < 8 ||
+        value.length > 12 ||
+        !/[a-zA-Z]/.test(value) ||
+        !/[0-9]/.test(value) ||
+        !/[!@#$%^&*(),.?":{}|<>]/.test(value)
+      )
+        error = "8~12자, 영문·숫자·특수문자를 모두 포함해야 합니다.";
+      break;
+
+    case "phone":
+      if (!/^010-\d{4}-\d{4}$/.test(value))
+        error = "전화번호는 010-1234-5678 형식으로 입력해야 합니다.";
+      break;
+
+    case "studentId":
+      if (!/^\d{9}$/.test(value))
+        error = "학번은 숫자 9자리여야 합니다.";
+      break;
+
+    default:
+      if (!value.trim()) error = "이 필드는 필수 입력입니다.";
+  }
+
+  setErrors((prev) => ({ ...prev, [name]: error }));
+};
+
+
+  // ✅ 입력 시 상태 업데이트 및 실시간 검증
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    let newValue = value;
+
+    // 전화번호 자동 하이픈
+    if (name === "phone") {
+      newValue = newValue.replace(/[^0-9]/g, "");
+      if (newValue.length < 4) newValue = newValue;
+      else if (newValue.length < 8)
+        newValue = `${newValue.slice(0, 3)}-${newValue.slice(3)}`;
+      else newValue = `${newValue.slice(0, 3)}-${newValue.slice(3, 7)}-${newValue.slice(7, 11)}`;
+    }
+
+    setForm((prev) => ({ ...prev, [name]: newValue }));
+    validateField(name, newValue);
+  };
+
+  // ✅ 제출 버튼 클릭 시 최종 검증
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitted(true);
+
+    let isValid = true;
+    Object.entries(form).forEach(([key, value]) => {
+      validateField(key, value);
+      if (value.trim() === "") isValid = false;
+    });
+
+    if (Object.values(errors).some((msg) => msg)) isValid = false;
+
+    if (isValid) setIsSubmitted(true);
   };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-purple-50 via-white to-purple-100">
-      {/* 🔹 반짝이는 배경 효과 */}
+      {/* 배경 */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute w-[600px] h-[600px] bg-purple-200/40 rounded-full blur-3xl top-[-200px] left-[-200px] animate-pulse"></div>
         <div className="absolute w-[500px] h-[500px] bg-purple-300/30 rounded-full blur-3xl bottom-[-200px] right-[-150px] animate-pulse"></div>
       </div>
 
-      {/* 🔹 네비게이션 */}
+      {/* 네비게이션 */}
       <div className="absolute top-0 left-0 w-full z-20">
         <Navbar />
       </div>
 
-      {/* 🔹 회원가입 or 축하 메시지 */}
       <AnimatePresence mode="wait">
         {!isSubmitted ? (
           <motion.div
@@ -42,114 +132,150 @@ export default function SignupPage() {
               회원가입
             </h2>
 
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form noValidate onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* 이메일 */}
               <div>
                 <label className="block text-sm font-semibold mb-2">이메일</label>
                 <input
-                  type="email"
+                  name="email"
+                  type="text"
+                  value={form.email}
+                  onChange={handleChange}
                   placeholder="example@kyonggi.ac.kr"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-400 outline-none"
+                  className={`w-full border rounded-lg px-4 py-2 focus:ring-2 outline-none ${
+                    errors.email
+                      ? "border-red-400 focus:ring-red-300"
+                      : "border-gray-300 focus:ring-purple-400"
+                  }`}
                 />
+                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
               </div>
 
-              {/* ✅ 비밀번호 입력칸 */}
+              {/* 비밀번호 */}
               <div className="relative">
                 <label className="block text-sm font-semibold mb-2">비밀번호</label>
                 <input
+                  name="password"
                   type={showPassword ? "text" : "password"}
+                  value={form.password}
+                  onChange={handleChange}
                   placeholder="비밀번호를 입력하세요"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 pr-10 focus:ring-2 focus:ring-purple-400 outline-none"
+                  className={`w-full border rounded-lg px-4 py-2 pr-10 focus:ring-2 outline-none ${
+                    errors.password
+                      ? "border-red-400 focus:ring-red-300"
+                      : "border-gray-300 focus:ring-purple-400"
+                  }`}
                 />
-                {/* 👁 아이콘 버튼 */}
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-[70%] -translate-y-1/2 text-gray-500 hover:text-purple-600 transition"
+                  className="absolute right-3 top-[55%] -translate-y-1/2 text-gray-500 hover:text-purple-600 transition"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
+                {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
               </div>
-
 
               {/* 소속학과 */}
               <div>
                 <label className="block text-sm font-semibold mb-2">소속 학과</label>
                 <input
-                  type="text"
+                  name="department"
+                  value={form.department}
+                  onChange={handleChange}
                   placeholder="컴퓨터공학전공"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-400 outline-none"
+                  className={`w-full border rounded-lg px-4 py-2 focus:ring-2 outline-none ${
+                    errors.department
+                      ? "border-red-400 focus:ring-red-300"
+                      : "border-gray-300 focus:ring-purple-400"
+                  }`}
                 />
+                {errors.department && <p className="text-red-500 text-xs mt-1">{errors.department}</p>}
               </div>
 
               {/* 학번 */}
               <div>
                 <label className="block text-sm font-semibold mb-2">학번</label>
                 <input
-                  type="text"
+                  name="studentId"
+                  value={form.studentId}
+                  onChange={handleChange}
                   placeholder="2025xxxxx"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-400 outline-none"
+                  className={`w-full border rounded-lg px-4 py-2 focus:ring-2 outline-none ${
+                    errors.studentId
+                      ? "border-red-400 focus:ring-red-300"
+                      : "border-gray-300 focus:ring-purple-400"
+                  }`}
                 />
+                {errors.studentId && <p className="text-red-500 text-xs mt-1">{errors.studentId}</p>}
               </div>
 
               {/* 이름 */}
               <div>
                 <label className="block text-sm font-semibold mb-2">이름</label>
                 <input
-                  type="text"
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
                   placeholder="솔부엉"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-400 outline-none"
+                  className={`w-full border rounded-lg px-4 py-2 focus:ring-2 outline-none ${
+                    errors.name
+                      ? "border-red-400 focus:ring-red-300"
+                      : "border-gray-300 focus:ring-purple-400"
+                  }`}
                 />
+                {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
               </div>
 
               {/* 전화번호 */}
               <div>
                 <label className="block text-sm font-semibold mb-2">전화번호</label>
                 <input
-                  type="tel"
+                  name="phone"
+                  value={form.phone}
+                  onChange={handleChange}
                   placeholder="010-1234-5678"
                   maxLength={13}
-                  onChange={(e) => {
-                    let value = e.target.value.replace(/[^0-9]/g, "");
-                    if (value.length < 4) {
-                      e.target.value = value;
-                    } else if (value.length < 8) {
-                      e.target.value = `${value.slice(0, 3)}-${value.slice(3)}`;
-                    } else {
-                      e.target.value = `${value.slice(0, 3)}-${value.slice(
-                        3,
-                        7
-                      )}-${value.slice(7, 11)}`;
-                    }
-                  }}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-400 outline-none"
+                  className={`w-full border rounded-lg px-4 py-2 focus:ring-2 outline-none ${
+                    errors.phone
+                      ? "border-red-400 focus:ring-red-300"
+                      : "border-gray-300 focus:ring-purple-400"
+                  }`}
                 />
+                {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
               </div>
 
               {/* 백준 아이디 */}
               <div>
                 <label className="block text-sm font-semibold mb-2">백준 아이디</label>
                 <input
-                  type="text"
+                  name="baekjoon"
+                  value={form.baekjoon}
+                  onChange={handleChange}
                   placeholder="sowlsowl"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-400 outline-none"
+                  className={`w-full border rounded-lg px-4 py-2 focus:ring-2 outline-none ${
+                    errors.baekjoon
+                      ? "border-red-400 focus:ring-red-300"
+                      : "border-gray-300 focus:ring-purple-400"
+                  }`}
                 />
+                {errors.baekjoon && <p className="text-red-500 text-xs mt-1">{errors.baekjoon}</p>}
               </div>
 
               {/* 메인 언어 */}
               <div className="relative">
-                <label className="block text-sm font-semibold mb-2">
-                  메인 언어 (하나만 선택)
-                </label>
-
-                  <select
-                    className="w-full appearance-none border border-gray-300 rounded-lg px-4 py-2 pr-10
-                              focus:ring-2 focus:ring-purple-400 outline-none
-                              text-gray-700 [&>option[disabled]]:text-gray-400
-                              [&>option[disabled]]:opacity-60"
-                    defaultValue=""
-                  >
-                  <option value="" disabled>
+                <label className="block text-sm font-semibold mb-2">메인 언어</label>
+                <select
+                  name="language"
+                  value={form.language}
+                  onChange={handleChange}
+                  className={`w-full appearance-none border rounded-lg px-4 py-2 pr-10 focus:ring-2 outline-none ${
+                    errors.language
+                      ? "border-red-400 focus:ring-red-300"
+                      : "border-gray-300 focus:ring-purple-400"
+                  }`}
+                >
+                  <option value="" disabled className="text-gray-400">
                     선택하세요
                   </option>
                   <option>C</option>
@@ -158,12 +284,11 @@ export default function SignupPage() {
                   <option>Python</option>
                   <option>JavaScript</option>
                 </select>
-
-                {/* 🔽 커스텀 드롭다운 아이콘 */}
                 <ChevronDown
                   size={18}
-                  className="absolute right-3 top-[70%] -translate-y-1/2 text-gray-500 hover:text-purple-600 transition"
+                  className="absolute right-3 top-[55%] -translate-y-1/2 text-gray-500 pointer-events-none"
                 />
+                {errors.language && <p className="text-red-500 text-xs mt-1">{errors.language}</p>}
               </div>
 
               {/* 제출 버튼 */}
