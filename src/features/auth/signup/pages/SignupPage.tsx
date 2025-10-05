@@ -12,7 +12,7 @@ export default function SignupPage() {
             <label className="block text-sm font-semibold mb-2">이름</label>
             <input
               type="text"
-              placeholder="홍길동"
+              placeholder="솔부엉이"
               className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-400 outline-none"
             />
           </div>
@@ -22,7 +22,7 @@ export default function SignupPage() {
             <label className="block text-sm font-semibold mb-2">학번</label>
             <input
               type="text"
-              placeholder="202211441"
+              placeholder="202599999"
               className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-400 outline-none"
             />
           </div>
@@ -32,7 +32,7 @@ export default function SignupPage() {
             <label className="block text-sm font-semibold mb-2">소속 학과</label>
             <input
               type="text"
-              placeholder="컴퓨터공학부"
+              placeholder="컴퓨터공학전공"
               className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-400 outline-none"
             />
           </div>
@@ -52,7 +52,7 @@ export default function SignupPage() {
             <label className="block text-sm font-semibold mb-2">백준 아이디</label>
             <input
               type="text"
-              placeholder="minjuj"
+              placeholder="sowlsowl"
               className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-400 outline-none"
             />
           </div>
@@ -62,7 +62,7 @@ export default function SignupPage() {
             <label className="block text-sm font-semibold mb-2">디스코드 아이디</label>
             <input
               type="text"
-              placeholder="mingmingmon#1234"
+              placeholder="sowl#1234"
               className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-400 outline-none"
             />
           </div>
@@ -77,12 +77,11 @@ export default function SignupPage() {
               <option value="" disabled>
                 선택하세요
               </option>
-              <option>Python</option>
-              <option>Java</option>
-              <option>C++</option>
-              <option>JavaScript</option>
-              <option>Kotlin</option>
               <option>C</option>
+              <option>C++</option>
+              <option>Java</option>
+              <option>Python</option>
+              <option>JavaScript</option>
             </select>
           </div>
 
