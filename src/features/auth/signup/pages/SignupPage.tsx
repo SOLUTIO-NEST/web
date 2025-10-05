@@ -357,7 +357,7 @@ export default function SignupPage() {
             </h2>
             <p className="text-neutral-700 mb-8 leading-relaxed">
               SOLUTIO에 지원해주셔서 감사합니다 <br />
-              좋은 결과가 있길 진심으로 기원합니다
+              좋은 결과가 있기를 진심으로 기원합니다
             </p>
             <div className="flex gap-6">
               <button
