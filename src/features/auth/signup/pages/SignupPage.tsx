@@ -169,7 +169,7 @@ export default function SignupPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-[55%] -translate-y-1/2 text-gray-500 hover:text-purple-600 transition"
+                  className="absolute right-3 top-[70%] -translate-y-1/2 text-gray-500 hover:text-purple-600 transition"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -286,7 +286,7 @@ export default function SignupPage() {
                 </select>
                 <ChevronDown
                   size={18}
-                  className="absolute right-3 top-[55%] -translate-y-1/2 text-gray-500 pointer-events-none"
+                  className="absolute right-3 top-[70%] -translate-y-1/2 text-gray-500 pointer-events-none"
                 />
                 {errors.language && <p className="text-red-500 text-xs mt-1">{errors.language}</p>}
               </div>
