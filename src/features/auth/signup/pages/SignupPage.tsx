@@ -353,11 +353,11 @@ export default function SignupPage() {
               🎉
             </motion.span>
             <h2 className="text-4xl font-extrabold text-purple-700 mb-4">
-              가입이 완료되었습니다!
+              신청이 완료되었습니다!
             </h2>
             <p className="text-neutral-700 mb-8 leading-relaxed">
-              SOLUTIO에 합류하신 걸 환영합니다 <br />
-              새로운 여정을 함께 시작해봅시다.
+              SOLUTIO에 지원해주셔서 감사합니다 <br />
+              좋은 결과가 있길 진심으로 바라겠습니다
             </p>
             <div className="flex gap-6">
               <button
