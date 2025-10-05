@@ -29,7 +29,7 @@ export default function SignupPage() {
 
           {/* 소속학과 */}
           <div>
-            <label className="block text-sm font-semibold mb-2">소속학과</label>
+            <label className="block text-sm font-semibold mb-2">소속 학과</label>
             <input
               type="text"
               placeholder="컴퓨터공학부"
