@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import { motion, AnimatePresence } from "framer-motion";
-import { Eye, EyeOff } from "lucide-react"; 
+import { Eye, EyeOff, ChevronDown } from "lucide-react"; 
 
 export default function SignupPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -43,13 +43,12 @@ export default function SignupPage() {
             </h2>
 
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-              {/* 학번 */}
+              {/* 이메일 */}
               <div>
-                <label className="block text-sm font-semibold mb-2">학번 (아이디로 사용)</label>
+                <label className="block text-sm font-semibold mb-2">이메일</label>
                 <input
-                  type="text"
-                  placeholder="2025xxxxx"
+                  type="email"
+                  placeholder="example@kyonggi.ac.kr"
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-400 outline-none"
                 />
               </div>
@@ -79,6 +78,16 @@ export default function SignupPage() {
                 <input
                   type="text"
                   placeholder="컴퓨터공학전공"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-400 outline-none"
+                />
+              </div>
+
+              {/* 학번 */}
+              <div>
+                <label className="block text-sm font-semibold mb-2">학번</label>
+                <input
+                  type="text"
+                  placeholder="2025xxxxx"
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-400 outline-none"
                 />
               </div>
@@ -128,14 +137,18 @@ export default function SignupPage() {
               </div>
 
               {/* 메인 언어 */}
-              <div className="md:col-span-2">
+              <div className="relative">
                 <label className="block text-sm font-semibold mb-2">
                   메인 언어 (하나만 선택)
                 </label>
-                <select
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-400 outline-none"
-                  defaultValue=""
-                >
+
+                  <select
+                    className="w-full appearance-none border border-gray-300 rounded-lg px-4 py-2 pr-10
+                              focus:ring-2 focus:ring-purple-400 outline-none
+                              text-gray-700 [&>option[disabled]]:text-gray-400
+                              [&>option[disabled]]:opacity-60"
+                    defaultValue=""
+                  >
                   <option value="" disabled>
                     선택하세요
                   </option>
@@ -145,6 +158,12 @@ export default function SignupPage() {
                   <option>Python</option>
                   <option>JavaScript</option>
                 </select>
+
+                {/* 🔽 커스텀 드롭다운 아이콘 */}
+                <ChevronDown
+                  size={18}
+                  className="absolute right-3 top-[70%] -translate-y-1/2 text-gray-500 hover:text-purple-600 transition"
+                />
               </div>
 
               {/* 제출 버튼 */}
