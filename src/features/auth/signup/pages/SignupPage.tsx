@@ -12,7 +12,7 @@ export default function SignupPage() {
       {/* 🔹 회원가입 카드 */}
       <div className="w-full max-w-3xl bg-white shadow-lg rounded-2xl p-10">
         <h2 className="text-3xl font-extrabold text-center mb-8 text-purple-700">
-          SOLUTIO 회원가입
+          회원가입
         </h2>
 
         <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
