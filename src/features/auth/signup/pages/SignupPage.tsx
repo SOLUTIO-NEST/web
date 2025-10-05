@@ -1,6 +1,15 @@
+import Navbar from "@/components/layout/Navbar";
+
 export default function SignupPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-purple-50">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-white to-purple-50 relative">
+      {/* 🔹 홈으로 돌아가기 버튼 (은은하게, 좌측 상단 고정) */}
+      
+      <div className="absolute top-0 left-0 w-full">
+        <Navbar />
+      </div>
+
+      {/* 🔹 회원가입 카드 */}
       <div className="w-full max-w-3xl bg-white shadow-lg rounded-2xl p-10">
         <h2 className="text-3xl font-extrabold text-center mb-8 text-purple-700">
           SOLUTIO 회원가입
