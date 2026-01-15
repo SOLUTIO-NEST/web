@@ -84,7 +84,7 @@ export default function ApplicationDetailModal({ app, onClose, onUpdateStatus }:
                     {app.status !== 'ACCEPTED' && (
                         <Button
                             onClick={() => onUpdateStatus('ACCEPTED')}
-                            className="bg-green-600 hover:bg-green-700 text-white"
+                            variant="success"
                         >
                             합격 처리
                         </Button>
@@ -92,7 +92,7 @@ export default function ApplicationDetailModal({ app, onClose, onUpdateStatus }:
                     {app.status !== 'REJECTED' && (
                         <Button
                             onClick={() => onUpdateStatus('REJECTED')}
-                            className="bg-white border border-gray-200 text-red-600 hover:bg-red-50 hover:border-red-200 shadow-none"
+                            variant="danger"
                         >
                             불합격 처리
                         </Button>
