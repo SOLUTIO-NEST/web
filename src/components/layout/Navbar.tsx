@@ -1,7 +1,12 @@
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import Container from "@/components/layout/Container";
 import Button from "@/components/ui/Button";
 
 export default function Navbar() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
   return (
     // 헤더는 fixed + relative (패널 기준) + 높이 64px(h-16)
     <header className="fixed top-0 left-0 right-0 z-50 relative bg-white/90 dark:bg-neutral-900/80 backdrop-blur shadow-sm h-16">
@@ -25,11 +30,45 @@ export default function Navbar() {
             <a className="dropdown-item" href="#">스터디</a>
             <a className="dropdown-item" href="#">대회</a>
           </BarMenu>
+
+          {user?.role === 'ADMIN' && (
+            <a
+              href="/admin/applications"
+              className="text-[15px] font-medium text-neutral-700 dark:text-neutral-300 hover:text-purple-600 transition-colors"
+            >
+              신청 관리
+            </a>
+          )}
         </nav>
 
         {/* 우측: 버튼들 */}
         <div className="flex items-center gap-3">
-          <Button variant="brandSoft" size="sm" className="shadow">로그인</Button>
+          {user ? (
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-gray-600">{user.name}님</span>
+              <Button
+                variant="brandSoft"
+                size="sm"
+                className="shadow"
+                onClick={() => {
+                  logout();
+                  navigate('/');
+                }}
+              >
+                로그아웃
+              </Button>
+            </div>
+          ) : (
+            <Button
+              variant="brandSoft"
+              size="sm"
+              className="shadow"
+              onClick={() => navigate('/login')}
+            >
+              로그인
+            </Button>
+          )}
+
           <Button variant="brand" size="sm" className="shadow">모집일정</Button>
         </div>
       </Container>
