@@ -13,7 +13,8 @@ export interface User {
 
 // Common Response Wrapper
 export interface ApiResponse<T> {
-    code: string;
+    success: boolean;
+    status: number;
     message: string;
     data: T;
 }
@@ -80,16 +81,18 @@ export interface ApplicantResponseDto {
     name: string;
     department: string;
     phoneNumber: string;
+    email?: string;
+    bojId?: string; // Backend sends bojId
+    mainLanguage?: MainLanguage;
+    applyReason?: string; // Backend sends applyReason
     isApprove: boolean | null;
     createdAt: string;
-    // Fields required by UI but potentially missing in docs (Assuming backend sends them or needs update)
-    email?: string;
+
+    // Legacy/UI aliases (to be deprecated or mapped)
+    phone?: string;
     baekjoonId?: string;
     language?: string;
     motivation?: string;
-    phone?: string; // UI uses 'phone', DTO has 'phoneNumber'. Need to map or alias.
-    mainLanguage?: MainLanguage;
-    applyReason?: string;
 }
 
 export interface PageResponse<T> {

@@ -13,11 +13,20 @@ export default function SignupPage() {
   const handleSubmit = async (formData: any) => {
     try {
       const recruitments = await recruitmentService.getAll();
-      if (recruitments.length === 0) {
+      console.log('Recruitments fetched:', recruitments);
+
+      if (!recruitments || recruitments.length === 0) {
         alert("현재 진행 중인 모집이 없습니다.");
         return;
       }
-      const recruitmentId = recruitments[recruitments.length - 1].id;
+
+      const lastRecruitment = recruitments[recruitments.length - 1];
+      if (!lastRecruitment) {
+        console.error("Last recruitment is undefined. Array:", recruitments);
+        alert("모집 정보를 불러오는 중 오류가 발생했습니다.");
+        return;
+      }
+      const recruitmentId = lastRecruitment.id;
 
       await applicantService.apply({
         email: formData.email,

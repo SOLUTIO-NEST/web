@@ -273,11 +273,11 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
                         <option value="" disabled className="text-gray-400">
                             선택하세요
                         </option>
-                        <option>C</option>
-                        <option>C++</option>
-                        <option>Java</option>
-                        <option>Python</option>
-                        <option>JavaScript</option>
+                        <option value="C">C</option>
+                        <option value="CPP">C++</option>
+                        <option value="JAVA">Java</option>
+                        <option value="PYTHON">Python</option>
+                        <option value="JAVASCRIPT">JavaScript</option>
                     </select>
                     <ChevronDown
                         size={18}

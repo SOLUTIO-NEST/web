@@ -49,8 +49,28 @@ export const recruitmentService = {
         // Actually, if it's a list, it should be List<RecruitmentResponseDto>. 
         // I will assume it returns the data structure as is.
         // Let's assume arrays for now if plural URL.
-        const response = await axiosInstance.get<ApiResponse<RecruitmentResponseDto[]>>('/recruitments');
-        return response.data.data;
+        const response = await axiosInstance.get<ApiResponse<RecruitmentResponseDto[] | RecruitmentResponseDto>>('/recruitments');
+        console.log('API Response (getAll):', response.data);
+        const data = response.data.data;
+
+        // Backend might be returning a single object (Page or just DTO) instead of Array?
+        // Or PageResponse?
+        // Let's handle non-array case by wrapping it.
+        if (!data) {
+            return [];
+        }
+
+        if (Array.isArray(data)) {
+            return data;
+        }
+
+        // If it looks like a PageResponse with 'content'
+        if ((data as any).content && Array.isArray((data as any).content)) {
+            return (data as any).content;
+        }
+
+        // If it's a single recruitment object
+        return [data as RecruitmentResponseDto];
     },
     update: async (id: number, data: RecruitmentUpdateRequestDto): Promise<number> => {
         const response = await axiosInstance.patch<ApiResponse<number>>(`/recruitments/${id}`, data);
@@ -72,9 +92,54 @@ export const applicantService = {
         return response.data.data;
     },
     getList: async (recruitmentId: number, page: number = 0, size: number = 10): Promise<PageResponse<ApplicantResponseDto>> => {
-        const response = await axiosInstance.get<ApiResponse<PageResponse<ApplicantResponseDto>>>(`/applicants/${recruitmentId}`, {
+        // Handle both PathVariable and potentially QueryParam based on what backend supports. 
+        const response = await axiosInstance.get<ApiResponse<PageResponse<ApplicantResponseDto> | ApplicantResponseDto[]>>(`/applicants/${recruitmentId}`, {
             params: { page, size }
         });
+        const data = response.data.data;
+
+        // Verify data exists
+        if (!data) {
+            return {
+                content: [],
+                pageNumber: 0,
+                pageSize: size,
+                totalElements: 0,
+                totalPages: 1,
+                last: true
+            };
+        }
+
+        // If backend returns a List instead of Page
+        if (Array.isArray(data)) {
+            return {
+                content: data,
+                pageNumber: 0,
+                pageSize: data.length,
+                totalElements: data.length,
+                totalPages: 1,
+                last: true
+            };
+        }
+
+        // Handle mismatch where backend returns 'contents' instead of 'content'
+        const rawData = data as any;
+        if (rawData.contents && Array.isArray(rawData.contents)) {
+            return {
+                content: rawData.contents,
+                pageNumber: rawData.page ?? 0,
+                pageSize: rawData.size ?? size,
+                totalElements: rawData.totalElements ?? 0,
+                totalPages: rawData.totalPages ?? 1,
+                last: rawData.hasNext === false // if hasNext is false, it is last
+            };
+        }
+
+        // If it returns standard PageResponse
+        return data as PageResponse<ApplicantResponseDto>;
+    },
+    getDetail: async (studentId: string): Promise<ApplicantResponseDto> => {
+        const response = await axiosInstance.get<ApiResponse<ApplicantResponseDto>>(`/applicants/detail/${studentId}`);
         return response.data.data;
     },
     approve: async (studentId: string): Promise<string> => {
