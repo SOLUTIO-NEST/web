@@ -1,0 +1,102 @@
+// Backend Role Enum (Stored in Token without ROLE_ prefix): GUEST, USER, STAFF, NEST, SUPER
+export type UserRole = 'GUEST' | 'USER' | 'STAFF' | 'NEST' | 'SUPER' | 'ADMIN';
+
+export interface User {
+    sub: string; // usually ID
+    auth: string; // roles
+    exp: number;
+    // Add other claims as needed
+    id?: string; // Derived
+    role?: UserRole; // Derived
+    name?: string; // Optional, might be in token
+}
+
+// Common Response Wrapper
+export interface ApiResponse<T> {
+    code: string;
+    message: string;
+    data: T;
+}
+
+// Authentication
+export interface LoginRequestDto {
+    id: string;
+    password: string;
+}
+
+export interface TokenResponse {
+    accessToken: string;
+    refreshToken: string;
+}
+
+// Recruitment
+export interface RecruitmentCreateRequestDto {
+    title: string;
+    startDateTime: string; // ISO 8601
+    endDateTime: string;   // ISO 8601
+}
+
+export interface RecruitmentUpdateRequestDto extends RecruitmentCreateRequestDto { }
+
+export interface RecruitmentResponseDto {
+    id: number;
+    title: string;
+    startDateTime: string;
+    endDateTime: string;
+}
+
+// Applicants
+export type MainLanguage = 'C' | 'CPP' | 'JAVA' | 'PYTHON' | 'JAVASCRIPT';
+
+export const MainLanguage = {
+    C: 'C',
+    CPP: 'CPP',
+    JAVA: 'JAVA',
+    PYTHON: 'PYTHON',
+    JAVASCRIPT: 'JAVASCRIPT',
+} as const;
+
+export interface ApplicantCreateRequestDto {
+    studentId: string;
+    recruitmentId: number;
+    email: string;
+    password: string;
+    department: string;
+    name: string;
+    phoneNumber: string;
+    bojId: string;
+    mainLanguage: MainLanguage;
+    applyReason: string;
+}
+
+export interface ApplicantPassResponseDto {
+    name: string;
+    recruitmentId: number;
+    isPassed: boolean | null;
+}
+
+export interface ApplicantResponseDto {
+    studentId: string;
+    name: string;
+    department: string;
+    phoneNumber: string;
+    isApprove: boolean | null;
+    createdAt: string;
+    // Fields required by UI but potentially missing in docs (Assuming backend sends them or needs update)
+    email?: string;
+    baekjoonId?: string;
+    language?: string;
+    motivation?: string;
+    phone?: string; // UI uses 'phone', DTO has 'phoneNumber'. Need to map or alias.
+    mainLanguage?: MainLanguage;
+    applyReason?: string;
+}
+
+export interface PageResponse<T> {
+    content: T[];
+    pageNumber: number;
+    pageSize: number;
+    totalElements: number;
+    totalPages: number;
+    last: boolean;
+}
