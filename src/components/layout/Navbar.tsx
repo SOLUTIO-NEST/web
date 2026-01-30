@@ -4,7 +4,7 @@ import Button from "@/components/ui/Button";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Navbar() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   return (
     // 헤더는 fixed + relative (패널 기준) + 높이 64px(h-16)
     <header className="fixed top-0 left-0 right-0 z-50 relative bg-white/90 dark:bg-neutral-900/80 backdrop-blur shadow-sm h-16">
@@ -41,13 +41,22 @@ export default function Navbar() {
 
         {/* 우측: 버튼들 */}
         <div className="flex items-center gap-3">
-          <Button variant="brandSoft" size="sm" className="shadow">로그인</Button>
-          <Button variant="brand" size="sm" className="shadow">모집일정</Button>
+          {user ? (
+            <Button variant="brandSoft" size="sm" className="shadow" onClick={logout}>로그아웃</Button>
+          ) : (
+            <a href="/login">
+              <Button variant="brandSoft" size="sm" className="shadow">로그인</Button>
+            </a>
+          )}
+          <a href="/recruitments">
+            <Button variant="brand" size="sm" className="shadow">모집일정</Button>
+          </a>
         </div>
       </Container>
     </header>
   );
 }
+
 
 /** 👇 hover 시, 헤더 아래 '가로 바'로 펼쳐지는 서브 메뉴 */
 function BarMenu({
