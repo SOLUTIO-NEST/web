@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { type ApplicantResponseDto } from "@/services/types";
 import { motion } from "framer-motion";
 import { X, Phone, Mail, Award, BookOpen, Calendar } from "lucide-react";
@@ -18,7 +19,24 @@ export default function ApplicationDetailModal({ app, onClose, onUpdateStatus }:
         return { label: '대기중', variant: 'warning' as const };
     };
 
-    const statusInfo = getStatusInfo(app.isApprove);
+    const [detail, setDetail] = useState<ApplicantResponseDto & { isLoading?: boolean }>({ ...app, isLoading: true });
+
+    useEffect(() => {
+        const fetchDetail = async () => {
+            try {
+                // If we already have the details in props (implied by non-null fields), skip? 
+                // But current props are summary.
+                const fullData = await import("@/services/api").then(m => m.applicantService.getDetail(app.studentId));
+                setDetail({ ...fullData, isLoading: false });
+            } catch (e) {
+                console.error("Failed to fetch detail", e);
+                setDetail(prev => ({ ...prev, isLoading: false }));
+            }
+        };
+        fetchDetail();
+    }, [app.studentId]);
+
+    const statusInfo = getStatusInfo(detail.isApprove);
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
@@ -43,11 +61,11 @@ export default function ApplicationDetailModal({ app, onClose, onUpdateStatus }:
                             🎓
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-gray-900">{app.name}</h2>
+                            <h2 className="text-xl font-bold text-gray-900">{detail.name}</h2>
                             <div className="text-sm text-gray-500 mt-1 flex flex-wrap gap-2">
-                                <span>{app.department}</span>
+                                <span>{detail.department}</span>
                                 <span className="text-gray-300">|</span>
-                                <span className="font-mono">{app.studentId}</span>
+                                <span className="font-mono">{detail.studentId}</span>
                             </div>
                             <div className="mt-3">
                                 <Badge variant={statusInfo.variant}>
@@ -66,12 +84,17 @@ export default function ApplicationDetailModal({ app, onClose, onUpdateStatus }:
 
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                    {detail.isLoading && (
+                        <div className="flex justify-center items-center py-10">
+                            <span className="text-purple-600 animate-spin mr-2">⏳</span> 로딩중...
+                        </div>
+                    )}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <InfoItem icon={<Mail size={18} />} label="이메일" value={app.email || '-'} />
-                        <InfoItem icon={<Phone size={18} />} label="전화번호" value={app.phoneNumber || app.phone || '-'} />
-                        <InfoItem icon={<Award size={18} />} label="백준 ID" value={app.baekjoonId || '-'} />
-                        <InfoItem icon={<BookOpen size={18} />} label="주력 언어" value={app.mainLanguage || app.language || '-'} />
-                        <InfoItem icon={<Calendar size={18} />} label="신청일" value={new Date(app.createdAt).toLocaleDateString()} />
+                        <InfoItem icon={<Mail size={18} />} label="이메일" value={detail.email || '-'} />
+                        <InfoItem icon={<Phone size={18} />} label="전화번호" value={detail.phoneNumber || detail.phone || '-'} />
+                        <InfoItem icon={<Award size={18} />} label="백준 ID" value={detail.bojId || detail.baekjoonId || '-'} />
+                        <InfoItem icon={<BookOpen size={18} />} label="주력 언어" value={detail.mainLanguage || detail.language || '-'} />
+                        <InfoItem icon={<Calendar size={18} />} label="신청일" value={detail.createdAt ? new Date(detail.createdAt).toLocaleDateString() : '-'} />
                     </div>
 
                     <div className="border-t border-gray-100 pt-6">
@@ -79,14 +102,14 @@ export default function ApplicationDetailModal({ app, onClose, onUpdateStatus }:
                             <span className="text-purple-600">✍️</span> 지원 동기
                         </h3>
                         <div className="bg-gray-50 rounded-xl p-4 text-gray-700 leading-relaxed whitespace-pre-wrap text-sm">
-                            {app.applyReason || app.motivation || "작성된 지원 동기가 없습니다."}
+                            {detail.applyReason || detail.motivation || "작성된 지원 동기가 없습니다."}
                         </div>
                     </div>
                 </div>
 
                 {/* Footer Actions */}
                 <div className="p-6 border-t border-gray-100 bg-gray-50/50 flex items-center justify-end gap-3 transition-colors">
-                    {app.isApprove !== true && (
+                    {detail.isApprove !== true && (
                         <Button
                             onClick={() => onUpdateStatus(true)}
                             variant="success"
@@ -94,7 +117,7 @@ export default function ApplicationDetailModal({ app, onClose, onUpdateStatus }:
                             합격 처리
                         </Button>
                     )}
-                    {app.isApprove !== false && (
+                    {detail.isApprove !== false && (
                         <Button
                             onClick={() => onUpdateStatus(false)}
                             variant="danger"

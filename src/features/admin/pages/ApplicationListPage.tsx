@@ -39,11 +39,17 @@ export default function ApplicationListPage() {
             }
 
             if (recruitmentId) {
-                const data = await applicantService.getList(recruitmentId, 0, 100); // Fetch all for now or huge page
-                setApplications(data.content);
+                console.log("Fetching applicants for recruitmentId:", recruitmentId);
+                const data = await applicantService.getList(recruitmentId, 0, 100);
+                console.log("Fetched applications content:", data.content);
+                setApplications(data?.content || []);
             }
-        } catch (e) {
-            console.error(e);
+        } catch (e: any) {
+            console.error("Failed to load applications:", e);
+            if (e.response) {
+                console.error("Error Response Data:", e.response.data);
+                console.error("Error Status:", e.response.status);
+            }
         } finally {
             setLoading(false);
         }
@@ -144,9 +150,18 @@ export default function ApplicationListPage() {
             await loadApplications();
             setSelectedIds(new Set());
             alert("처리가 완료되었습니다.");
-        } catch (e) {
+        } catch (e: any) {
             console.error(e);
-            alert("처리 중 오류가 발생했습니다.");
+            let errorMessage = "처리 중 오류가 발생했습니다.";
+            if (e.response) {
+                errorMessage += `\n상태 코드: ${e.response.status}`;
+                if (e.response.data && e.response.data.message) {
+                    errorMessage += `\n메시지: ${e.response.data.message}`;
+                } else if (e.response.data && e.response.data.detail) {
+                    errorMessage += `\n상세: ${e.response.data.detail}`;
+                }
+            }
+            alert(errorMessage);
         } finally {
             setProcessing(false);
         }
