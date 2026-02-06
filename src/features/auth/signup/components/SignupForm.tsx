@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Eye, EyeOff, ChevronDown } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
+import PrivacyPolicyModal from "./PrivacyPolicyModal";
 
 interface SignupFormProps {
     onSubmit: (formData: any) => void;
@@ -8,6 +10,11 @@ interface SignupFormProps {
 export default function SignupForm({ onSubmit }: SignupFormProps) {
     const [showPassword, setShowPassword] = useState(false);
     const [motivation, setMotivation] = useState("");
+
+    // ✅ 개인정보 동의 상태
+    const [isAgreed, setIsAgreed] = useState(false);
+    const [isPrivacyPolicyOpen, setIsPrivacyPolicyOpen] = useState(false);
+    const [isTriedSubmit, setIsTriedSubmit] = useState(false);
 
     // ✅ 입력값 상태
     const [form, setForm] = useState({
@@ -87,9 +94,9 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
         validateField(name, newValue);
     };
 
-    // ✅ 제출 시 검증
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        setIsTriedSubmit(true);
         let isValid = true;
 
         Object.entries(form).forEach(([key, value]) => {
@@ -98,6 +105,13 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
         });
 
         if (Object.values(errors).some((msg) => msg)) isValid = false;
+
+        // ✅ 개인정보 동의 체크 확인
+        if (!isAgreed) {
+            isValid = false;
+            // 스크롤을 맨 아래로 내려서 동의 필요함을 알림
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
 
         if (isValid) {
             onSubmit({ ...form, motivation });
@@ -110,17 +124,14 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
             onSubmit={handleSubmit}
             className="grid grid-cols-1 md:grid-cols-2 gap-6"
         >
-            {/* 상단 제목 + 제출 버튼 */}
-            <div className="md:col-span-2 flex justify-between items-center mb-4">
+            {/* 상단 제목 */}
+            <div className="md:col-span-2 mb-4 text-center">
                 <h2 className="text-3xl font-extrabold text-purple-700">
                     SOLUTIO 입단신청서
                 </h2>
-                <button
-                    type="submit"
-                    className="bg-purple-600 text-white font-bold px-6 py-2 rounded-lg shadow-md hover:bg-purple-700 transition transform hover:scale-105"
-                >
-                    제출하기
-                </button>
+                <p className="text-gray-500 mt-2">
+                    아래 내용을 빠짐없이 작성해주세요.
+                </p>
             </div>
 
             {/* 이메일 */}
@@ -306,6 +317,50 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
                     {motivation.length} / 256
                 </p>
             </div>
+            {/* 개인정보 수집 및 이용 동의 */}
+            <div className="md:col-span-2 border-t pt-6 mt-2">
+                <div className="flex items-start gap-3">
+                    <input
+                        type="checkbox"
+                        id="privacyConsent"
+                        checked={isAgreed}
+                        onChange={(e) => setIsAgreed(e.target.checked)}
+                        className="mt-1 w-5 h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500 cursor-pointer"
+                    />
+                    <label htmlFor="privacyConsent" className="text-sm text-gray-700 select-none">
+                        <span className="font-bold text-gray-900">[필수]</span> 개인정보 수집 및 이용에 동의합니다.
+                        <button
+                            type="button"
+                            onClick={() => setIsPrivacyPolicyOpen(true)}
+                            className="text-purple-600 underline ml-2 hover:text-purple-800 font-medium"
+                        >
+                            내용 보기
+                        </button>
+                    </label>
+                </div>
+                {!isAgreed && isTriedSubmit && (
+                    <p className="text-red-500 text-xs mt-2 ml-8">
+                        개인정보 수집 및 이용에 동의해야 신청이 가능합니다.
+                    </p>
+                )}
+            </div>
+
+            {/* 하단 버튼 */}
+            <div className="md:col-span-2 mt-4">
+                <button
+                    type="submit"
+                    className="w-full bg-purple-600 text-white font-bold px-6 py-4 rounded-xl shadow-lg hover:bg-purple-700 transition transform hover:scale-[1.01] active:scale-[0.99] text-lg"
+                >
+                    지원서 제출하기
+                </button>
+            </div>
+
+            {/* 개인정보 처리방침 모달 */}
+            <AnimatePresence>
+                {isPrivacyPolicyOpen && (
+                    <PrivacyPolicyModal onClose={() => setIsPrivacyPolicyOpen(false)} />
+                )}
+            </AnimatePresence>
         </form>
     );
 }
