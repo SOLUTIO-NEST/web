@@ -2,7 +2,9 @@ name: Frontend CI/CD
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+      - 'chore/#17'
   workflow_dispatch:
 
 jobs:
