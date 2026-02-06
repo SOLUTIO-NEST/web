@@ -33,8 +33,8 @@ jobs:
         platforms: linux/arm64
         push: true
         tags: |
-          ghcr.io/${{ github.repository_owner }}/solutio-frontend:latest
-          ghcr.io/${{ github.repository_owner }}/solutio-frontend:${{ github.sha }}
+          ghcr.io/${{ github.repository_owner }}/web:latest
+          ghcr.io/${{ github.repository_owner }}/web:${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Deploy to Raspberry Pi
+    - name: Deploy to Server
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.SERVER_HOST }}
