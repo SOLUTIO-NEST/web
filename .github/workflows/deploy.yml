@@ -42,7 +42,7 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     
-    step:
+    steps:
     - name: Deploy to Server
       uses: appleboy/ssh-action@v1.0.0
       with:
