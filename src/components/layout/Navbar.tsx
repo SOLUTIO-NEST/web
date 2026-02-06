@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import Container from "@/components/layout/Container";
 import Button from "@/components/ui/Button";
 

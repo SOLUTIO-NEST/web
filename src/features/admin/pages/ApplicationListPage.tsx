@@ -96,54 +96,6 @@ export default function ApplicationListPage() {
         setProcessing(true);
         try {
             await applicantService.batchCreateMember(currentRecruitmentId);
-            // Also need to ensure they are approved? The batch API might just create members from approved applicants? 
-            // Docs say: "Batch Create Members". Usually implies taking approved applicants and making them members.
-            // But here the button says "합격/계정생성". 
-            // If the API only creates members from ALREADY approved, we might need to approve them first.
-            // But let's assume usage pattern is: Approve individually, then Batch Create.
-            // Or maybe Batch Create takes a list? Docs: POST /api/v1/applicants/batch/{recruitmentId}. 
-            // Returns List<String> (Student IDs).
-            // It doesn't take a body of IDs. So likely it defaults to ALL approved applicants?
-            // "Batch Create Members (Nest Only) ... Access: ROLE_NEST".
-            // The user logic implies selecting specific IDs.
-            // If the API doesn't support list of IDs, then the UI "Selected IDs" might be misleading if we can't restrict to them.
-            // But let's check docs again.
-            // "Batch Create Members ... URL: /api/v1/applicants/batch/{recruitmentId}". No body specified with IDs.
-            // "Individual Create Member ... URL: /api/v1/applicants/{studentId}".
-
-            // If we selected IDs, we should probably loop and call "Individual Create Member" OR "Approve" depending on intent.
-            // If the button says "Batch Create", it probably calls the batch endpoint.
-            // But if users select a subset, calling a batch endpoint that affects ALL is dangerous.
-            // I'll assume for now we loop through selected IDs and call manual approve if needed, or if intent is "Create Member Account", we call individual create member?
-            // The Button says "합격/계정생성".
-            // If I look at old code: `api.processApplications(ids, 'APPROVE_AND_NOTIFY')`.
-            // The old mock code looped and set status to ACCEPTED.
-
-            // New API: `approve` (PATCH) and `batchCreateMember` (POST).
-            // `batchCreateMember` likely creates account for ALL approved applicants.
-            // So if I want to "Approve and Create Account" for selected:
-            // 1. Loop and Approve.
-            // 2. Call Individual Create Member for each?
-            // Docs has "Individual Create Member".
-
-            // I'll implement: Loop selected -> Approve. Then Loop selected -> Create Member.
-            // OR just Approve.
-            // Wait, "Individual Create Member (Nest Only)" access is ROLE_NEST. Staff can't do it?
-            // Only NEST can create members.
-            // If this page is for Staff, they can only Approve.
-            // If for NEST, they can do both.
-            // I'll assume likely "Approve" is the main action here.
-
-            // Let's stick to simple "Approve" for now for the bulk action if "Batch Create" is restricted.
-            // Or use the Batch Create Endpoint if the user has permission.
-            // Given the ambiguity, I'll loop and `approve` them.
-            // And maybe `individualCreateMember` if approved?
-
-            // Let's just implement Loop Approve for now as safe bet for "Bulk Approve".
-            // If the user wants to create accounts, there might be another button or flow for NEST role.
-            // The old button said "합격/계정생성".
-
-            // I will iterate and approve.
             const ids = Array.from(selectedIds);
             await Promise.all(ids.map(id => applicantService.approve(id)));
 
