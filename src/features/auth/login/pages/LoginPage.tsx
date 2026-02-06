@@ -9,7 +9,7 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 
 export default function LoginPage() {
-    const [email, setEmail] = useState("");
+    const [studentId, setStudentId] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
@@ -20,7 +20,7 @@ export default function LoginPage() {
         e.preventDefault();
         setError("");
         try {
-            await login(email, password);
+            await login(studentId, password);
             navigate("/");
         } catch (err: any) {
             setError(err.toString());
@@ -56,11 +56,11 @@ export default function LoginPage() {
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <Input
-                            label="이메일"
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="user@solutio.com"
+                            label="학번"
+                            type="text"
+                            value={studentId}
+                            onChange={(e) => setStudentId(e.target.value)}
+                            placeholder="202400000"
                         />
 
                         <div className="relative">

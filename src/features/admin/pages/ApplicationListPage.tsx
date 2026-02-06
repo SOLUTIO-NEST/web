@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Container from "@/components/layout/Container";
-import { api, type Application } from "@/services/api";
+import { applicantService, recruitmentService } from "@/services/api";
+import type { ApplicantResponseDto } from "@/services/types";
 import { AnimatePresence } from "framer-motion";
 import { Send, Loader2 } from "lucide-react";
 import ApplicationDetailModal from "../components/ApplicationDetailModal";
@@ -10,11 +11,12 @@ import ApplicationTable from "../components/ApplicationTable";
 import Button from "@/components/ui/Button";
 
 export default function ApplicationListPage() {
-    const [applications, setApplications] = useState<Application[]>([]);
+    const [applications, setApplications] = useState<ApplicantResponseDto[]>([]);
     const [loading, setLoading] = useState(true);
-    const [selectedApp, setSelectedApp] = useState<Application | null>(null);
+    const [selectedApp, setSelectedApp] = useState<ApplicantResponseDto | null>(null);
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [filter, setFilter] = useState("ALL"); // ALL, PENDING, ACCEPTED, REJECTED
+    const [currentRecruitmentId, setCurrentRecruitmentId] = useState<number | null>(null);
 
     const [processing, setProcessing] = useState(false);
 
@@ -25,25 +27,61 @@ export default function ApplicationListPage() {
     const loadApplications = async () => {
         setLoading(true);
         try {
-            const data = await api.getApplications();
-            setApplications(data);
-        } catch (e) {
-            console.error(e);
+            // First, get recruitment ID if not set
+            let recruitmentId = currentRecruitmentId;
+            if (!recruitmentId) {
+                const recruitments = await recruitmentService.getAll();
+                if (recruitments.length > 0) {
+                    // Assuming the first one is the target or latest
+                    recruitmentId = recruitments[recruitments.length - 1].id;
+                    setCurrentRecruitmentId(recruitmentId);
+                }
+            }
+
+            if (recruitmentId) {
+                console.log("Fetching applicants for recruitmentId:", recruitmentId);
+                const data = await applicantService.getList(recruitmentId, 0, 100);
+                console.log("Fetched applications content:", data.content);
+                setApplications(data?.content || []);
+            }
+        } catch (e: any) {
+            console.error("Failed to load applications:", e);
+            if (e.response) {
+                console.error("Error Response Data:", e.response.data);
+                console.error("Error Status:", e.response.status);
+            }
         } finally {
             setLoading(false);
         }
     };
 
-    const toggleStatus = async (app: Application) => {
-        const newStatus = app.status === 'ACCEPTED' ? 'REJECTED' : 'ACCEPTED';
-        // If it was PENDING, toggle to ACCEPTED first
-        const targetStatus = app.status === 'PENDING' ? 'ACCEPTED' : newStatus;
+    const toggleStatus = async (app: ApplicantResponseDto, explicitStatus?: boolean) => {
+        let targetStatus: boolean;
+
+        if (explicitStatus !== undefined) {
+            targetStatus = explicitStatus;
+        } else {
+            // Toggle logic: null -> true, true -> false, false -> true
+            if (app.isApprove === null) targetStatus = true;
+            else if (app.isApprove === true) targetStatus = false;
+            else targetStatus = true;
+        }
 
         try {
+            // Optimistic update
             setApplications(prev => prev.map(a =>
-                a.id === app.id ? { ...a, status: targetStatus } : a
+                a.studentId === app.studentId ? { ...a, isApprove: targetStatus } : a
             ));
-            await api.updateApplicationStatus(app.id, targetStatus);
+
+            if (selectedApp && selectedApp.studentId === app.studentId) {
+                setSelectedApp({ ...selectedApp, isApprove: targetStatus });
+            }
+
+            if (targetStatus) {
+                await applicantService.approve(app.studentId);
+            } else {
+                await applicantService.reject(app.studentId);
+            }
         } catch (e) {
             console.error(e);
             // revert on error
@@ -52,17 +90,30 @@ export default function ApplicationListPage() {
     };
 
     const handleBulkProcess = async () => {
-        if (selectedIds.size === 0) return;
+        if (selectedIds.size === 0 || !currentRecruitmentId) return;
         if (!confirm(`${selectedIds.size}명의 합격 처리를 진행하고 계정을 생성하시겠습니까?`)) return;
 
         setProcessing(true);
         try {
-            await api.processApplications(Array.from(selectedIds), 'APPROVE_AND_NOTIFY');
+            await applicantService.batchCreateMember(currentRecruitmentId);
+            const ids = Array.from(selectedIds);
+            await Promise.all(ids.map(id => applicantService.approve(id)));
+
             await loadApplications();
             setSelectedIds(new Set());
             alert("처리가 완료되었습니다.");
-        } catch (e) {
-            alert("처리 중 오류가 발생했습니다.");
+        } catch (e: any) {
+            console.error(e);
+            let errorMessage = "처리 중 오류가 발생했습니다.";
+            if (e.response) {
+                errorMessage += `\n상태 코드: ${e.response.status}`;
+                if (e.response.data && e.response.data.message) {
+                    errorMessage += `\n메시지: ${e.response.data.message}`;
+                } else if (e.response.data && e.response.data.detail) {
+                    errorMessage += `\n상세: ${e.response.data.detail}`;
+                }
+            }
+            alert(errorMessage);
         } finally {
             setProcessing(false);
         }
@@ -77,14 +128,17 @@ export default function ApplicationListPage() {
 
     const filteredApps = applications.filter(app => {
         if (filter === 'ALL') return true;
-        return app.status === filter;
+        if (filter === 'ACCEPTED') return app.isApprove === true;
+        if (filter === 'REJECTED') return app.isApprove === false;
+        if (filter === 'PENDING') return app.isApprove === null;
+        return true;
     });
 
     const toggleAll = () => {
         if (selectedIds.size === filteredApps.length) {
             setSelectedIds(new Set());
         } else {
-            setSelectedIds(new Set(filteredApps.map(a => a.id)));
+            setSelectedIds(new Set(filteredApps.map(a => a.studentId)));
         }
     }
 
@@ -107,7 +161,7 @@ export default function ApplicationListPage() {
                                 className="flex items-center gap-2"
                             >
                                 {processing ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
-                                <span>{selectedIds.size}명 일괄 합격/계정생성</span>
+                                <span>{selectedIds.size}명 일괄 합격</span>
                             </Button>
                         </div>
                     </div>
@@ -136,8 +190,7 @@ export default function ApplicationListPage() {
                         app={selectedApp}
                         onClose={() => setSelectedApp(null)}
                         onUpdateStatus={(status) => {
-                            toggleStatus({ ...selectedApp, status });
-                            setSelectedApp({ ...selectedApp, status });
+                            toggleStatus(selectedApp, status);
                         }}
                     />
                 )}

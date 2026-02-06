@@ -28,6 +28,7 @@ export default function App() {
         />
 
         {/* 회원가입 페이지 */}
+        {/* 회원가입 페이지 */}
         <Route
           path="/signup"
           element={
@@ -42,6 +43,8 @@ export default function App() {
             </motion.div>
           }
         />
+
+        {/* 로그인 페이지 */}
         <Route
           path="/login"
           element={
@@ -57,18 +60,11 @@ export default function App() {
           }
         />
 
-        {/* 관리자: 신청 관리 */}
+        {/* 관리자 페이지 */}
         <Route
           path="/admin/applications"
           element={
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="w-full h-full"
-            >
-              <ApplicationListPage />
-            </motion.div>
+            <ApplicationListPage />
           }
         />
       </Routes>

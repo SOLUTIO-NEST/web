@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import { motion, AnimatePresence } from "framer-motion";
-import { api } from "@/services/api";
+import { applicantService, recruitmentService } from "@/services/api";
+import type { MainLanguage } from "@/services/types";
 import SignupForm from "../components/SignupForm";
 
 export default function SignupPage() {
@@ -11,20 +12,37 @@ export default function SignupPage() {
 
   const handleSubmit = async (formData: any) => {
     try {
-      await api.submitApplication({
+      const recruitments = await recruitmentService.getAll();
+      console.log('Recruitments fetched:', recruitments);
+
+      if (!recruitments || recruitments.length === 0) {
+        alert("현재 진행 중인 모집이 없습니다.");
+        return;
+      }
+
+      const lastRecruitment = recruitments[recruitments.length - 1];
+      if (!lastRecruitment) {
+        console.error("Last recruitment is undefined. Array:", recruitments);
+        alert("모집 정보를 불러오는 중 오류가 발생했습니다.");
+        return;
+      }
+      const recruitmentId = lastRecruitment.id;
+
+      await applicantService.apply({
         email: formData.email,
         password: formData.password,
         name: formData.name,
         department: formData.department,
         studentId: formData.studentId,
-        phone: formData.phone,
-        baekjoonId: formData.baekjoon,
-        language: formData.language,
-        motivation: formData.motivation,
+        phoneNumber: formData.phone,
+        bojId: formData.baekjoon,
+        mainLanguage: formData.language as MainLanguage,
+        applyReason: formData.motivation,
+        recruitmentId: recruitmentId,
       });
       setIsSubmitted(true);
-    } catch (err) {
-      alert("신청 제출 중 오류가 발생했습니다.");
+    } catch (err: any) {
+      alert("신청 제출 중 오류가 발생했습니다: " + (err.response?.data?.message || err.message));
       console.error(err);
     }
   };

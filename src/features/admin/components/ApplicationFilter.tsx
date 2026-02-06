@@ -1,15 +1,18 @@
-import { type Application } from "@/services/api";
+import { type ApplicantResponseDto } from "@/services/types";
 
 interface Props {
     filter: string;
     setFilter: (filter: string) => void;
-    applications: Application[];
+    applications: ApplicantResponseDto[];
 }
 
 export default function ApplicationFilter({ filter, setFilter, applications }: Props) {
     const getCount = (status: string) => {
         if (status === 'ALL') return applications.length;
-        return applications.filter(a => a.status === status).length;
+        if (status === 'ACCEPTED') return applications.filter(a => a.isApprove === true).length;
+        if (status === 'REJECTED') return applications.filter(a => a.isApprove === false).length;
+        if (status === 'PENDING') return applications.filter(a => a.isApprove === null).length;
+        return 0;
     };
 
     return (
@@ -19,8 +22,8 @@ export default function ApplicationFilter({ filter, setFilter, applications }: P
                     key={f}
                     onClick={() => setFilter(f)}
                     className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${filter === f
-                            ? 'border-purple-600 text-purple-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700'
+                        ? 'border-purple-600 text-purple-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
                         }`}
                 >
                     {f === 'ALL' ? '전체' : f === 'PENDING' ? '대기중' : f === 'ACCEPTED' ? '합격' : '불합격'}
