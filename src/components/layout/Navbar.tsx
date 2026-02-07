@@ -20,13 +20,13 @@ export default function Navbar() {
         {/* 가운데: 메뉴 (가로 바 방식) */}
         <nav className="hidden md:flex items-center gap-30">
           <BarMenu label="소개">
-            <a className="dropdown-item" href="#">동아리 소개</a>
-            <a className="dropdown-item" href="#">연혁</a>
+            <a className="dropdown-item cursor-pointer" onClick={(e) => { e.preventDefault(); alert("아직 개발중입니다."); }}>동아리 소개</a>
+            <a className="dropdown-item cursor-pointer" onClick={(e) => { e.preventDefault(); alert("아직 개발중입니다."); }}>연혁</a>
           </BarMenu>
 
           <BarMenu label="활동">
-            <a className="dropdown-item" href="#">스터디</a>
-            <a className="dropdown-item" href="#">대회</a>
+            <a className="dropdown-item cursor-pointer" onClick={(e) => { e.preventDefault(); alert("아직 개발중입니다."); }}>스터디</a>
+            <a className="dropdown-item cursor-pointer" onClick={(e) => { e.preventDefault(); alert("아직 개발중입니다."); }}>대회</a>
           </BarMenu>
 
           {(user?.role === 'STAFF' || user?.role === 'NEST' || user?.role === 'SUPER' || user?.role === 'ADMIN') && (
