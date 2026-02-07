@@ -53,6 +53,6 @@ jobs:
         script: |
           cd ~/solutio-deploy
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker-compose pull frontend
-          docker-compose up -d frontend
+          docker compose pull frontend
+          docker compose up -d frontend
           docker image prune -f
