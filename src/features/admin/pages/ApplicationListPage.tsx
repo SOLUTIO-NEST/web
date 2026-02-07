@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import Navbar from "@/components/layout/Navbar";
 import Container from "@/components/layout/Container";
 import { applicantService, recruitmentService } from "@/services/api";
@@ -11,6 +13,9 @@ import ApplicationTable from "../components/ApplicationTable";
 import Button from "@/components/ui/Button";
 
 export default function ApplicationListPage() {
+    const { user, isLoading: isAuthLoading } = useAuth();
+    const navigate = useNavigate();
+
     const [applications, setApplications] = useState<ApplicantResponseDto[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedApp, setSelectedApp] = useState<ApplicantResponseDto | null>(null);
@@ -21,8 +26,26 @@ export default function ApplicationListPage() {
     const [processing, setProcessing] = useState(false);
 
     useEffect(() => {
-        loadApplications();
-    }, []);
+        if (!isAuthLoading) {
+            // 1) 로그인 안 했으면 홈으로
+            if (!user) {
+                navigate("/", { replace: true });
+                return;
+            }
+            // 2) 권한 체크 (USER(MEMBER), GUEST는 접근 불가)
+            if (user.role === 'USER' || user.role === 'GUEST') {
+                alert("접근 권한이 없습니다.");
+                navigate("/", { replace: true });
+                return;
+            }
+        }
+    }, [user, isAuthLoading, navigate]);
+
+    useEffect(() => {
+        if (user && !isAuthLoading && user.role !== 'USER' && user.role !== 'GUEST') {
+            loadApplications();
+        }
+    }, [user, isAuthLoading]);
 
     const loadApplications = async () => {
         setLoading(true);
