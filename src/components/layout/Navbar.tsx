@@ -1,9 +1,7 @@
-import { useNavigate } from "react-router-dom";
+
 import { useAuth } from "@/context/AuthContext";
 import Container from "@/components/layout/Container";
 import Button from "@/components/ui/Button";
-
-import { useAuth } from "@/context/AuthContext";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
