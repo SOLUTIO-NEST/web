@@ -1,0 +1,18 @@
+@import "tailwindcss";
+@import "katex/dist/katex.min.css";
+
+/* 전역 베이스 설정 */
+@layer base {
+  :root {
+    /* Tailwind v4: font-sans가 참조하는 변수 */
+    --font-sans: "Noto Sans KR", ui-sans-serif, system-ui, -apple-system,
+      "Segoe UI", Roboto, "Helvetica Neue", Arial, "Apple SD Gothic Neo",
+      "Noto Sans", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji";
+  }
+
+  /* ✅ 전역으로 적용 */
+  html { font-family: var(--font-sans); }
+
+  html, body, #root { height: 100%; }
+  body { margin: 0; }
+}
