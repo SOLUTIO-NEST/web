@@ -136,7 +136,7 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
 
             {/* 이메일 */}
             <div>
-                <label className="block text-sm font-semibold mb-2">이메일</label>
+                <label className="block text-sm font-semibold mb-2">학교 이메일</label>
                 <input
                     name="email"
                     type="text"
