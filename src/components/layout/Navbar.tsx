@@ -21,22 +21,22 @@ export default function Navbar() {
           </span>
         </a>
 
-        {/* 가운데: 메뉴 (가로 바 방식) */}
-        <nav className="hidden md:flex items-center gap-30">
-          <BarMenu label="소개">
-            <a className="dropdown-item cursor-pointer" onClick={(e) => { e.preventDefault(); alert("아직 개발중입니다."); }}>동아리 소개</a>
-            <a className="dropdown-item cursor-pointer" onClick={(e) => { e.preventDefault(); alert("아직 개발중입니다."); }}>연혁</a>
-          </BarMenu>
-
-          <BarMenu label="활동">
-            <a className="dropdown-item cursor-pointer" onClick={(e) => { e.preventDefault(); alert("아직 개발중입니다."); }}>스터디</a>
-            <a className="dropdown-item cursor-pointer" onClick={(e) => { e.preventDefault(); alert("아직 개발중입니다."); }}>대회</a>
-          </BarMenu>
+        {/* 가운데: 메뉴 */}
+        <nav className="hidden md:flex items-center gap-8">
+          {["동아리 소개", "연혁", "스터디", "대회"].map((label) => (
+            <a
+              key={label}
+              className="text-[15px] font-medium text-slate-400 hover:text-purple-600 transition-colors cursor-pointer"
+              onClick={(e) => { e.preventDefault(); alert("아직 개발중입니다."); }}
+            >
+              {label}
+            </a>
+          ))}
 
           {(user?.role === 'STAFF' || user?.role === 'NEST' || user?.role === 'SUPER' || user?.role === 'ADMIN') && (
             <a
               href="/admin/applications"
-              className="text-[15px] font-medium text-neutral-700 dark:text-neutral-300 hover:text-purple-600 transition-colors"
+              className="text-[15px] font-medium text-slate-400 hover:text-purple-600 transition-colors"
             >
               신청 관리
             </a>
@@ -69,57 +69,5 @@ export default function Navbar() {
         )}
       </AnimatePresence>
     </header>
-  );
-}
-
-
-/** 👇 hover 시, 헤더 아래 '가로 바'로 펼쳐지는 서브 메뉴 */
-function BarMenu({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="relative group">
-      {/* 탭 버튼 */}
-      <button
-        className="relative flex items-center gap-1 px-1 text-[15px] font-medium
-                   text-neutral-700 dark:text-neutral-300 hover:opacity-80"
-      >
-        {label}
-        <span className="transition-transform group-hover:rotate-180"></span>
-      </button>
-
-      {/* ⬇️ 헤더 바로 아래에 고정: fixed top-16 (헤더 높이 64px) */}
-      <div className="pointer-events-none fixed left-0 right-0 top-16 z-40">
-        <div
-          className="invisible opacity-0 translate-y-1
-                     group-hover:visible group-hover:opacity-100 group-hover:translate-y-0
-                     group-focus-within:visible group-focus-within:opacity-100 group-focus-within:translate-y-0
-                     transition-all duration-150 pointer-events-auto"
-        >
-          <div className="border-t border-neutral-200 bg-white/95 dark:bg-neutral-900/90 backdrop-blur">
-            {/* 내부는 가로 정렬 + 줄바꿈 금지 */}
-            <Container fluid pad="sm" className="flex items-center justify-center gap-10 py-3">
-              <div className="flex items-center gap-10
-                              [&_a.dropdown-item]:inline-flex
-                              [&_a.dropdown-item]:items-center
-                              [&_a.dropdown-item]:px-2
-                              [&_a.dropdown-item]:py-2
-                              [&_a.dropdown-item]:text-[15px]
-                              [&_a.dropdown-item]:font-medium
-                              [&_a.dropdown-item]:text-neutral-700
-                              dark:[&_a.dropdown-item]:text-neutral-300
-                              [&_a.dropdown-item]:whitespace-nowrap
-                              [&_a.dropdown-item:hover]:text-[#924ED1]">
-                {children}
-              </div>
-            </Container>
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }
