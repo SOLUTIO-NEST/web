@@ -142,6 +142,10 @@ export const applicantService = {
         const response = await axiosInstance.get<ApiResponse<ApplicantResponseDto>>(`/applicants/detail/${studentId}`);
         return response.data.data;
     },
+    updateClassLevel: async (studentId: string, classLevel: string | null): Promise<string> => {
+        const response = await axiosInstance.patch<ApiResponse<string>>(`/applicants/level/${studentId}`, { classLevel });
+        return response.data.data;
+    },
     approve: async (studentId: string): Promise<string> => {
         const response = await axiosInstance.patch<ApiResponse<string>>(`/applicants/approve/${studentId}`);
         return response.data.data;

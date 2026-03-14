@@ -1,4 +1,3 @@
-
 import { useAuth } from "@/context/AuthContext";
 import Container from "@/components/layout/Container";
 import Button from "@/components/ui/Button";
@@ -6,13 +5,6 @@ import Button from "@/components/ui/Button";
 import { useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import RecruitmentInfoModal from "@/features/land/components/RecruitmentInfoModal";
-
-const NAV_ITEMS = [
-  { label: "동아리 소개", href: "#" },
-  { label: "연혁", href: "#" },
-  { label: "스터디", href: "#" },
-  { label: "대회", href: "#" },
-];
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -24,18 +16,18 @@ export default function Navbar() {
         {/* 좌측: 로고 */}
         <a href="/" className="flex items-center gap-3">
           <img src="/logo.svg" alt="SOLUTIO NEST" className="h-9 w-9" />
-          <span className="text-xl md:text-2xl font-extrabold tracking-tight text-white">
+          <span className="text-xl md:text-2xl font-extrabold tracking-tight">
             SOLUTIO NEST
           </span>
         </a>
 
         {/* 가운데: 메뉴 */}
         <nav className="hidden md:flex items-center gap-8">
-          {NAV_ITEMS.map(({ label, href }) => (
+          {["동아리 소개", "연혁", "스터디", "대회"].map((label) => (
             <a
               key={label}
-              href={href}
-              className="text-[15px] font-medium text-slate-300 hover:text-white transition-colors"
+              className="text-[15px] font-medium text-slate-400 hover:text-purple-600 transition-colors cursor-pointer"
+              onClick={(e) => { e.preventDefault(); alert("아직 개발중입니다."); }}
             >
               {label}
             </a>
@@ -44,7 +36,7 @@ export default function Navbar() {
           {(user?.role === 'STAFF' || user?.role === 'NEST' || user?.role === 'SUPER' || user?.role === 'ADMIN') && (
             <a
               href="/admin/applications"
-              className="text-[15px] font-medium text-slate-300 hover:text-white transition-colors"
+              className="text-[15px] font-medium text-slate-400 hover:text-purple-600 transition-colors"
             >
               신청 관리
             </a>
