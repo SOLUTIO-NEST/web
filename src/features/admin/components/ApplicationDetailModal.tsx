@@ -1,17 +1,34 @@
 import { useState, useEffect } from "react";
 import { type ApplicantResponseDto } from "@/services/types";
 import { motion } from "framer-motion";
-import { X, Phone, Mail, Award, BookOpen, Calendar } from "lucide-react";
+import { X, Phone, Mail, Award, BookOpen, Calendar, GraduationCap } from "lucide-react";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
+import Select from "@/components/ui/Select";
+
+const CLASS_LEVELS = [
+    { value: '', label: '미정' },
+    { value: 'SEED', label: 'Seed' },
+    { value: 'BRANCH', label: 'Branch' },
+    { value: 'TREE', label: 'Tree' },
+] as const;
+
+function normalizeClassLevel(raw: string | null | undefined): string {
+    if (!raw || raw === '미정') return '';
+    const upper = raw.toUpperCase();
+    if (['SEED', 'BRANCH', 'TREE'].includes(upper)) return upper;
+    const map: Record<string, string> = { Seed: 'SEED', Branch: 'BRANCH', Tree: 'TREE' };
+    return map[raw] ?? '';
+}
 
 interface Props {
     app: ApplicantResponseDto;
     onClose: () => void;
     onUpdateStatus: (isApprove: boolean) => void;
+    onUpdateClassLevel: (classLevel: string | null) => void;
 }
 
-export default function ApplicationDetailModal({ app, onClose, onUpdateStatus }: Props) {
+export default function ApplicationDetailModal({ app, onClose, onUpdateStatus, onUpdateClassLevel }: Props) {
     // Helper to determine status string/variant
     const getStatusInfo = (isApprove: boolean | null) => {
         if (isApprove === true) return { label: '합격', variant: 'success' as const };
@@ -20,6 +37,11 @@ export default function ApplicationDetailModal({ app, onClose, onUpdateStatus }:
     };
 
     const [detail, setDetail] = useState<ApplicantResponseDto & { isLoading?: boolean }>({ ...app, isLoading: true });
+    const [selectedLevel, setSelectedLevel] = useState<string>(normalizeClassLevel(app.classLevel));
+
+    useEffect(() => {
+        setDetail(prev => ({ ...prev, isApprove: app.isApprove }));
+    }, [app.isApprove]);
 
     useEffect(() => {
         const fetchDetail = async () => {
@@ -28,6 +50,7 @@ export default function ApplicationDetailModal({ app, onClose, onUpdateStatus }:
                 // But current props are summary.
                 const fullData = await import("@/services/api").then(m => m.applicantService.getDetail(app.studentId));
                 setDetail({ ...fullData, isLoading: false });
+                setSelectedLevel(normalizeClassLevel(fullData.classLevel));
             } catch (e) {
                 console.error("Failed to fetch detail", e);
                 setDetail(prev => ({ ...prev, isLoading: false }));
@@ -95,6 +118,11 @@ export default function ApplicationDetailModal({ app, onClose, onUpdateStatus }:
                         <InfoItem icon={<Award size={18} />} label="백준 ID" value={detail.bojId || detail.baekjoonId || '-'} />
                         <InfoItem icon={<BookOpen size={18} />} label="주력 언어" value={detail.mainLanguage || detail.language || '-'} />
                         <InfoItem icon={<Calendar size={18} />} label="신청일" value={detail.createdAt ? new Date(detail.createdAt).toLocaleDateString() : '-'} />
+                        <InfoItem
+                            icon={<GraduationCap size={18} />}
+                            label="배정 반"
+                            value={CLASS_LEVELS.find(l => l.value === normalizeClassLevel(detail.classLevel))?.label ?? '미정'}
+                        />
                     </div>
 
                     <div className="border-t border-gray-100 pt-6">
@@ -108,23 +136,39 @@ export default function ApplicationDetailModal({ app, onClose, onUpdateStatus }:
                 </div>
 
                 {/* Footer Actions */}
-                <div className="p-6 border-t border-gray-100 bg-gray-50/50 flex items-center justify-end gap-3 transition-colors">
-                    {detail.isApprove !== true && (
-                        <Button
-                            onClick={() => onUpdateStatus(true)}
-                            variant="success"
+                <div className="p-6 border-t border-gray-100 bg-gray-50/50 space-y-3">
+                    {/* Class Level */}
+                    <div className="flex items-center gap-2">
+                        <Select
+                            value={selectedLevel}
+                            onChange={(e) => setSelectedLevel(e.target.value)}
+                            className="flex-1 text-sm h-10"
                         >
-                            합격 처리
-                        </Button>
-                    )}
-                    {detail.isApprove !== false && (
+                            {CLASS_LEVELS.map((l) => (
+                                <option key={l.value} value={l.value}>{l.label}</option>
+                            ))}
+                        </Select>
                         <Button
-                            onClick={() => onUpdateStatus(false)}
-                            variant="danger"
+                            variant="brandSoft"
+                            className="h-10 px-4 text-sm shrink-0"
+                            onClick={() => onUpdateClassLevel(selectedLevel === '' ? null : selectedLevel)}
                         >
-                            불합격 처리
+                            반 저장
                         </Button>
-                    )}
+                    </div>
+                    {/* Approve / Reject */}
+                    <div className="flex items-center justify-end gap-3">
+                        {detail.isApprove !== true && (
+                            <Button onClick={() => onUpdateStatus(true)} variant="success">
+                                합격 처리
+                            </Button>
+                        )}
+                        {detail.isApprove !== false && (
+                            <Button onClick={() => onUpdateStatus(false)} variant="danger">
+                                불합격 처리
+                            </Button>
+                        )}
+                    </div>
                 </div>
             </motion.div>
         </div>
