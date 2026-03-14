@@ -83,10 +83,15 @@ export default function ApplicationTable({
                                     </td>
                                     <td className="px-6 py-4 text-gray-600">{app.phoneNumber || app.phone}</td>
                                     <td className="px-6 py-4">
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex flex-col gap-1">
                                             <span className="text-gray-500 text-xs">
                                                 {new Date(app.createdAt).toLocaleDateString()}
                                             </span>
+                                            {app.classLevel && app.classLevel !== '미정' && (
+                                                <span className="inline-flex w-fit items-center rounded-full bg-purple-50 px-2 py-0.5 text-xs font-medium text-purple-700 ring-1 ring-purple-200">
+                                                    {app.classLevel}
+                                                </span>
+                                            )}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
