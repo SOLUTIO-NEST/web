@@ -123,7 +123,7 @@ function PassedContent({ status, onClose }: ContentProps) {
     );
 }
 
-function FailedContent({ status, onClose }: ContentProps) {
+function FailedContent({ onClose }: ContentProps) {
     return (
         <div>
             {/* Header */}

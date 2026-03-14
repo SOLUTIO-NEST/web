@@ -6,13 +6,6 @@ import { useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import RecruitmentInfoModal from "@/features/land/components/RecruitmentInfoModal";
 
-const NAV_ITEMS = [
-  { label: "동아리 소개", href: "#" },
-  { label: "연혁", href: "#" },
-  { label: "스터디", href: "#" },
-  { label: "대회", href: "#" },
-];
-
 export default function Navbar() {
   const { user, logout } = useAuth();
   const [showRecruitmentModal, setShowRecruitmentModal] = useState(false);
@@ -23,7 +16,7 @@ export default function Navbar() {
         {/* 좌측: 로고 */}
         <a href="/" className="flex items-center gap-3">
           <img src="/logo.svg" alt="SOLUTIO NEST" className="h-9 w-9" />
-          <span className="text-xl md:text-2xl font-extrabold tracking-tight text-white">
+          <span className="text-xl md:text-2xl font-extrabold tracking-tight">
             SOLUTIO NEST
           </span>
         </a>
