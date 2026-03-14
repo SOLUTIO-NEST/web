@@ -72,9 +72,15 @@ export interface ApplicantCreateRequestDto {
 
 export interface ApplicantPassResponseDto {
     name: string;
+    classLevel: string | null;
+    groupAccountLink: string | null;
+    groupAccountNumber: string | null;
     recruitmentId: number;
+    passedMessage: string | null;
     isPassed: boolean | null;
 }
+
+export type ClassLevel = 'SEED' | 'BRANCH' | 'TREE';
 
 export interface ApplicantResponseDto {
     studentId: string;
@@ -86,6 +92,7 @@ export interface ApplicantResponseDto {
     mainLanguage?: MainLanguage;
     applyReason?: string; // Backend sends applyReason
     isApprove: boolean | null;
+    classLevel?: string | null;
     createdAt: string;
 
     // Legacy/UI aliases (to be deprecated or mapped)
