@@ -29,7 +29,7 @@ export default function ResultModal({ isOpen, onClose, status, isLoading }: Resu
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.95, opacity: 0, y: 10 }}
                         onClick={(e) => e.stopPropagation()}
-                        className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl"
+                        className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl max-h-[90vh] flex flex-col"
                     >
                         {isLoading ? (
                             <div className="flex justify-center p-10">
@@ -65,7 +65,7 @@ interface ContentProps {
 
 function PassedContent({ status, onClose }: ContentProps) {
     return (
-        <div>
+        <div className="flex flex-col flex-1 min-h-0">
             {/* Header */}
             <div className="bg-green-50 px-6 pt-8 pb-6 text-center border-b border-green-100">
                 <div className="text-5xl mb-3">🎉</div>
@@ -76,7 +76,7 @@ function PassedContent({ status, onClose }: ContentProps) {
             </div>
 
             {/* Details */}
-            <div className="px-6 py-5 space-y-3">
+            <div className="px-6 py-5 space-y-3 overflow-y-auto flex-1 min-h-0">
                 {status.classLevel && (
                     <InfoRow
                         label="배정 반"
