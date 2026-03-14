@@ -112,6 +112,20 @@ export default function ApplicationListPage() {
         }
     };
 
+    const updateClassLevel = async (studentId: string, classLevel: string | null) => {
+        try {
+            await applicantService.updateClassLevel(studentId, classLevel);
+            setApplications(prev => prev.map(a =>
+                a.studentId === studentId ? { ...a, classLevel } : a
+            ));
+            if (selectedApp?.studentId === studentId) {
+                setSelectedApp(prev => prev ? { ...prev, classLevel } : null);
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
     const handleBulkProcess = async () => {
         if (selectedIds.size === 0 || !currentRecruitmentId) return;
         if (!confirm(`${selectedIds.size}명의 합격 처리를 진행하고 계정을 생성하시겠습니까?`)) return;
@@ -212,9 +226,8 @@ export default function ApplicationListPage() {
                     <ApplicationDetailModal
                         app={selectedApp}
                         onClose={() => setSelectedApp(null)}
-                        onUpdateStatus={(status) => {
-                            toggleStatus(selectedApp, status);
-                        }}
+                        onUpdateStatus={(status) => toggleStatus(selectedApp, status)}
+                        onUpdateClassLevel={(classLevel) => updateClassLevel(selectedApp.studentId, classLevel)}
                     />
                 )}
             </AnimatePresence>
