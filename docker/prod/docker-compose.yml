@@ -1,0 +1,15 @@
+services:
+  frontend:
+    image: solutionest/solutio-web:prod
+    container_name: solutio-prod-frontend
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "3000:80"
+    networks:
+      - solutio-network
+
+networks:
+  solutio-network:
+    external: true

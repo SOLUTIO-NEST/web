@@ -1,0 +1,15 @@
+services:
+  frontend:
+    image: solutionest/solutio-web:staging
+    container_name: solutio-staging-frontend
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "3001:80"
+    networks:
+      - solutio-network
+
+networks:
+  solutio-network:
+    external: true
