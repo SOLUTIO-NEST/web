@@ -11,5 +11,5 @@ services:
       - solutio-network
 
 networks:
-  solutio-network:
+  solutio-staging-net:
     external: true
