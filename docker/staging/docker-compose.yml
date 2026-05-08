@@ -3,5 +3,7 @@ services:
     image: solutionest/solutio-web:staging
     container_name: solutio-staging-frontend
     restart: unless-stopped
+    env_file:
+          - .env
     ports:
       - "3000:80"

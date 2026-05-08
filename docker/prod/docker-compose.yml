@@ -3,5 +3,7 @@ services:
     image: solutionest/solutio-web:prod
     container_name: solutio-prod-frontend
     restart: unless-stopped
+    env_file:
+          - .env
     ports:
       - "80:80"
