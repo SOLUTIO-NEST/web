@@ -4,6 +4,12 @@ services:
     container_name: solutio-staging-frontend
     restart: unless-stopped
     env_file:
-          - .env
+      - .env
     ports:
-      - "3000:80"
+      - "3001:80"
+    networks:
+      - solutio-network
+
+networks:
+  solutio-network:
+    external: true
