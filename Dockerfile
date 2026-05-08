@@ -1,6 +1,6 @@
 # Multi-stage build for React + Vite
 # Stage 1: Build
-FROM node:20-alpine AS build
+FROM node:20-slim AS build
 
 WORKDIR /app
 
@@ -13,7 +13,7 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Nginx 서빙
-FROM nginx:alpine
+FROM nginx:stable
 
 # 빌드 결과물 복사
 COPY --from=build /app/dist /usr/share/nginx/html
