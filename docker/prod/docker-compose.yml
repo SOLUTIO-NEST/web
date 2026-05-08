@@ -1,0 +1,7 @@
+services:
+  frontend:
+    image: solutionest/solutio-web:prod
+    container_name: solutio-prod-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
