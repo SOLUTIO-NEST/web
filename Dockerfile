@@ -19,7 +19,8 @@ FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 
 # Nginx 설정 복사
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+ENV NGINX_ENVSUBST_FILTER=BACKEND_HOST
+COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 
 # 비root 유저로 실행 (보안)
 RUN chown -R nginx:nginx /usr/share/nginx/html && \
