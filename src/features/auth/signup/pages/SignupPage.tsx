@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Navbar from "@/components/layout/Navbar";
+import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { applicantService, recruitmentService } from "@/services/api";
 import type { MainLanguage } from "@/services/types";
@@ -13,20 +12,15 @@ export default function SignupPage() {
   const handleSubmit = async (formData: any) => {
     try {
       const recruitments = await recruitmentService.getAll();
-      console.log('Recruitments fetched:', recruitments);
-
       if (!recruitments || recruitments.length === 0) {
         alert("현재 진행 중인 모집이 없습니다.");
         return;
       }
-
       const lastRecruitment = recruitments[recruitments.length - 1];
       if (!lastRecruitment) {
-        console.error("Last recruitment is undefined. Array:", recruitments);
         alert("모집 정보를 불러오는 중 오류가 발생했습니다.");
         return;
       }
-      const recruitmentId = lastRecruitment.id;
 
       await applicantService.apply({
         email: formData.email,
@@ -38,76 +32,103 @@ export default function SignupPage() {
         bojId: formData.baekjoon,
         mainLanguage: formData.language as MainLanguage,
         applyReason: formData.motivation,
-        recruitmentId: recruitmentId,
+        recruitmentId: lastRecruitment.id,
       });
       setIsSubmitted(true);
     } catch (err: any) {
       alert("신청 제출 중 오류가 발생했습니다: " + (err.response?.data?.message || err.message));
-      console.error(err);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-purple-50 via-white to-purple-100">
-      {/* 🔹 배경 효과 */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute w-[600px] h-[600px] bg-purple-200/40 rounded-full blur-3xl top-[-200px] left-[-200px] animate-pulse"></div>
-        <div className="absolute w-[500px] h-[500px] bg-purple-300/30 rounded-full blur-3xl bottom-[-200px] right-[-150px] animate-pulse"></div>
-      </div>
+    <div className="min-h-screen flex flex-col bg-neutral-100 text-black">
 
-      {/* 🔹 네비게이션 */}
-      <div className="absolute top-0 left-0 w-full z-20">
-        <Navbar />
-      </div>
+      {/* 헤더 */}
+      <header className="flex items-center justify-between border-b border-black/10 shrink-0">
+        <a href="/" className="flex items-center gap-3 px-5 md:px-6 py-4">
+          <img src="/logo.png" alt="SOLUTIO" className="h-8 w-8" />
+          <span className="hidden md:inline text-lg font-extrabold tracking-tight">SOLUTIO NEST</span>
+        </a>
+        <div className="flex items-center">
+          <a href="/login" className="px-4 py-4 text-sm font-bold border-l border-black/10 hover:bg-black/5 transition-colors">
+            로그인
+          </a>
+          <Link to="/" className="px-5 py-4 text-sm font-bold border-l border-black/10 hover:bg-black/5 transition-colors">
+            홈으로
+          </Link>
+        </div>
+      </header>
 
       <AnimatePresence mode="wait">
         {!isSubmitted ? (
           <motion.div
             key="form"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -30 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            className="w-full max-w-2xl z-10 mt-16"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            className="flex-1 flex flex-col lg:flex-row min-h-0"
           >
-            <SignupForm onSubmit={handleSubmit} />
+            {/* 좌측: 타이틀 영역 */}
+            <div className="lg:w-[38%] lg:border-r border-b lg:border-b-0 border-black/10 flex flex-col justify-between px-5 md:px-10 py-8 md:py-12">
+              <div>
+                <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-[0.95] tracking-tighter">
+                  입단<br />신청
+                </h1>
+              </div>
+              <p className="mt-8 lg:mt-0 text-base md:text-lg font-semibold text-black/60 leading-relaxed">
+                아래 내용을 작성하고<br />
+                SOLUTIO에 합류하세요.
+              </p>
+            </div>
+
+            {/* 우측: 폼 영역 */}
+            <div className="flex-1 overflow-y-auto">
+              <SignupForm onSubmit={handleSubmit} />
+            </div>
           </motion.div>
         ) : (
           <motion.div
             key="success"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="flex flex-col items-center justify-center bg-white rounded-3xl shadow-2xl px-16 py-14 text-center max-w-2xl z-10"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            className="flex-1 flex flex-col lg:flex-row min-h-0"
           >
-            <motion.span
-              className="text-5xl mb-4"
-              animate={{ rotate: [0, 10, -10, 0] }}
-              transition={{ repeat: Infinity, duration: 1.5 }}
-            >
-              🎉
-            </motion.span>
-            <h2 className="text-4xl font-extrabold text-purple-700 mb-4">
-              신청이 완료되었습니다!
-            </h2>
-            <p className="text-neutral-700 mb-8 leading-relaxed">
-              SOLUTIO에 지원해주셔서 감사합니다 <br />
-              좋은 결과가 있기를 진심으로 기원합니다
-            </p>
-            <div className="flex gap-6">
-              <button
-                onClick={() => navigate("/")}
-                className="px-8 py-3 bg-purple-600 text-white rounded-lg font-semibold shadow-md hover:bg-purple-700 transition"
-              >
-                홈으로 가기
-              </button>
-              <button
-                onClick={() => navigate("/login")}
-                className="px-8 py-3 border-2 border-purple-400 text-purple-700 rounded-lg font-semibold hover:bg-purple-50 transition"
-              >
-                로그인하기
-              </button>
+            {/* 좌측 */}
+            <div className="lg:w-[38%] lg:border-r border-b lg:border-b-0 border-black/10 flex flex-col justify-between px-5 md:px-10 py-8 md:py-12">
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-[0.95] tracking-tighter">
+                신청<br />완료
+              </h1>
+              <p className="mt-8 lg:mt-0 text-base md:text-lg font-semibold text-black/60 leading-relaxed">
+                SOLUTIO에 지원해주셔서 감사합니다.<br />
+                좋은 결과가 있기를 진심으로 기원합니다.
+              </p>
+            </div>
+
+            {/* 우측 */}
+            <div className="flex-1 flex flex-col items-start justify-center px-5 md:px-10 lg:px-16 py-12">
+              <div className="space-y-8 w-full max-w-lg">
+                <p className="text-lg font-semibold text-black/70">
+                  합격 발표는 메인 페이지에서 확인하실 수 있습니다.
+                </p>
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => navigate("/")}
+                    className="px-6 py-3 bg-black text-white font-bold hover:bg-black/85 transition-colors flex items-center gap-2"
+                  >
+                    홈으로 가기
+                    <span>→</span>
+                  </button>
+                  <button
+                    onClick={() => navigate("/login")}
+                    className="px-6 py-3 border border-black/30 font-bold hover:bg-black/5 transition-colors"
+                  >
+                    로그인하기
+                  </button>
+                </div>
+              </div>
             </div>
           </motion.div>
         )}
