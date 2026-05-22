@@ -1,5 +1,4 @@
 import { useAuth } from "@/context/AuthContext";
-import Container from "@/components/layout/Container";
 import Button from "@/components/ui/Button";
 
 import { useState } from "react";
@@ -10,23 +9,22 @@ export default function Navbar() {
   const { user, logout } = useAuth();
   const [showRecruitmentModal, setShowRecruitmentModal] = useState(false);
   return (
-    // 헤더는 fixed + relative (패널 기준) + 높이 64px(h-16)
-    <header className="fixed top-0 left-0 right-0 z-50 relative bg-white/90 dark:bg-neutral-900/80 backdrop-blur shadow-sm h-16">
-      <Container fluid pad="sm" className="flex h-full items-center justify-between gap-4">
+    <header className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-6xl">
+      <div className="flex h-14 items-center justify-between px-5 rounded-2xl bg-white/40 backdrop-blur-xl border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.08)]">
         {/* 좌측: 로고 */}
         <a href="/" className="flex items-center gap-3">
-          <img src="/logo.svg" alt="SOLUTIO NEST" className="h-9 w-9" />
-          <span className="text-xl md:text-2xl font-extrabold tracking-tight">
+          <img src="/logo.png" alt="SOLUTIO NEST" className="h-8 w-8" />
+          <span className="text-lg md:text-xl font-extrabold tracking-tight text-neutral-800">
             SOLUTIO NEST
           </span>
         </a>
 
         {/* 가운데: 메뉴 */}
         <nav className="hidden md:flex items-center gap-8">
-          {["동아리 소개", "연혁", "스터디", "대회"].map((label) => (
+          {["연혁", "스터디", "대회"].map((label) => (
             <a
               key={label}
-              className="text-[15px] font-medium text-slate-400 hover:text-purple-600 transition-colors cursor-pointer"
+              className="text-[14px] font-medium text-neutral-500 hover:text-purple-600 transition-colors cursor-pointer"
               onClick={(e) => { e.preventDefault(); alert("아직 개발중입니다."); }}
             >
               {label}
@@ -36,7 +34,7 @@ export default function Navbar() {
           {(user?.role === 'STAFF' || user?.role === 'NEST' || user?.role === 'SUPER' || user?.role === 'ADMIN') && (
             <a
               href="/admin/applications"
-              className="text-[15px] font-medium text-slate-400 hover:text-purple-600 transition-colors"
+              className="text-[14px] font-medium text-neutral-500 hover:text-purple-600 transition-colors"
             >
               신청 관리
             </a>
@@ -44,24 +42,23 @@ export default function Navbar() {
         </nav>
 
         {/* 우측: 버튼들 */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {user ? (
-            <Button variant="brandSoft" size="sm" className="shadow" onClick={logout}>로그아웃</Button>
+            <Button variant="brandSoft" size="sm" onClick={logout}>로그아웃</Button>
           ) : (
             <a href="/login">
-              <Button variant="brandSoft" size="sm" className="shadow">로그인</Button>
+              <Button variant="brandSoft" size="sm">로그인</Button>
             </a>
           )}
           <Button
             variant="brand"
             size="sm"
-            className="shadow"
             onClick={() => setShowRecruitmentModal(true)}
           >
             모집일정
           </Button>
         </div>
-      </Container>
+      </div>
 
       <AnimatePresence>
         {showRecruitmentModal && (

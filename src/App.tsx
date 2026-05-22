@@ -20,7 +20,7 @@ export default function App() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.98 }}
               transition={{ duration: 0.5, ease: "easeOut" }}
-              className="w-full h-full"
+              className="w-full min-h-screen"
             >
               <LandingPage />
             </motion.div>
