@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import Navbar from "@/components/layout/Navbar";
+
 import Container from "@/components/layout/Container";
 import { applicantService, recruitmentService } from "@/services/api";
 import type { ApplicantResponseDto } from "@/services/types";
@@ -181,8 +181,7 @@ export default function ApplicationListPage() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <Navbar />
-            <div className="pt-24 pb-12">
+            <div className="pt-6 pb-12">
                 <Container>
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                         <div>

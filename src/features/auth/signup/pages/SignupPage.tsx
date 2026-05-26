@@ -43,22 +43,6 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen flex flex-col bg-neutral-100 text-black">
 
-      {/* 헤더 */}
-      <header className="flex items-center justify-between border-b border-black/10 shrink-0">
-        <a href="/" className="flex items-center gap-3 px-5 md:px-6 py-4">
-          <img src="/logo.png" alt="SOLUTIO" className="h-8 w-8" />
-          <span className="hidden md:inline text-lg font-extrabold tracking-tight">SOLUTIO NEST</span>
-        </a>
-        <div className="flex items-center">
-          <a href="/login" className="px-4 py-4 text-sm font-bold border-l border-black/10 hover:bg-black/5 transition-colors">
-            로그인
-          </a>
-          <Link to="/" className="px-5 py-4 text-sm font-bold border-l border-black/10 hover:bg-black/5 transition-colors">
-            홈으로
-          </Link>
-        </div>
-      </header>
-
       <AnimatePresence mode="wait">
         {!isSubmitted ? (
           <motion.div

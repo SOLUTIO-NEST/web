@@ -1,11 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
-import ResultModal from "@/features/land/components/ResultModal";
 import RecruitmentInfoModal from "@/features/land/components/RecruitmentInfoModal";
-import { applicantService } from "@/services/api";
-import type { ApplicantPassResponseDto } from "@/services/types";
 
 interface HeroProps {
   showRecruitmentModal: boolean;
@@ -13,11 +8,6 @@ interface HeroProps {
 }
 
 export default function Hero({ showRecruitmentModal, onRecruitmentToggle }: HeroProps) {
-  const { user, logout } = useAuth();
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [passStatus, setPassStatus] = useState<ApplicantPassResponseDto | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -25,168 +15,10 @@ export default function Hero({ showRecruitmentModal, onRecruitmentToggle }: Hero
     return () => clearTimeout(t);
   }, []);
 
-  const handleCheckResult = async () => {
-    setIsModalOpen(true);
-    setIsLoading(true);
-    try {
-      const status = await applicantService.getMyStatus();
-      setPassStatus(status);
-    } catch (error) {
-      console.error("Failed to fetch applicant status", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const isStaff = user?.role === "STAFF" || user?.role === "NEST" || user?.role === "SUPER" || user?.role === "ADMIN";
-
   return (
-    <>
-      {/* ── 헤더 ── */}
-      <header id="main-header" className="sticky top-0 z-30 bg-[#a855f7] flex items-center justify-between border-b border-black/15 h-14 lg:relative lg:w-[100vw] lg:-ml-[calc(38vw)]">
-        {/* 좌측: 로고 */}
-        <a href="/" className="flex items-center gap-3 px-4 md:px-6 h-full">
-          <img src="/logo.png" alt="SOLUTIO" className="h-7 w-auto object-contain" />
-          <span className="hidden md:inline text-lg font-extrabold tracking-tight text-black">
-            SOLUTIO NEST
-          </span>
-        </a>
-
-        {/* 우측: 데스크탑 네비게이션 */}
-        <div className="hidden md:flex items-center h-full">
-          {["연혁", "스터디", "대회"].map((label) => (
-            <a
-              key={label}
-              className="w-20 h-full flex items-center justify-center text-[13px] font-semibold text-black/60 hover:text-black border-l border-black/15 hover:bg-black/5 active:bg-black/10 transition-colors cursor-pointer"
-              onClick={(e) => { e.preventDefault(); alert("아직 개발중입니다."); }}
-            >
-              {label}
-            </a>
-          ))}
-          {isStaff && (
-            <a href="/admin/applications" className="w-20 h-full flex items-center justify-center text-[13px] font-semibold text-black/60 hover:text-black border-l border-black/15 hover:bg-black/5 active:bg-black/10 transition-colors">
-              신청 관리
-            </a>
-          )}
-          {user ? (
-            <button onClick={logout} className="px-4 h-full text-sm font-bold border-l border-black/15 hover:bg-black/5 active:bg-black/10 transition-colors">
-              로그아웃
-            </button>
-          ) : (
-            <a href="/login" className="px-4 h-full flex items-center text-sm font-bold border-l border-black/15 hover:bg-black/5 active:bg-black/10 transition-colors">
-              로그인
-            </a>
-          )}
-          {!user ? (
-            <Link to="/signup" className="px-5 h-full flex items-center text-sm font-bold bg-black text-[#a855f7] hover:bg-black/85 transition-colors gap-2">
-              합류하기 <span className="text-xs">→</span>
-            </Link>
-          ) : user?.role === "GUEST" ? (
-            <button onClick={handleCheckResult} className="px-5 h-full flex items-center text-sm font-bold bg-black text-[#a855f7] hover:bg-black/85 transition-colors gap-2">
-              결과 확인 <span className="text-xs">→</span>
-            </button>
-          ) : null}
-        </div>
-
-        {/* 우측: 모바일 — 로그인 + 합류하기 + 햄버거 */}
-        <div className="flex md:hidden items-center h-full">
-          {user ? (
-            <button onClick={logout} className="px-3 h-full text-sm font-bold border-l border-black/15 hover:bg-black/5 transition-colors">
-              로그아웃
-            </button>
-          ) : (
-            <a href="/login" className="px-3 h-full flex items-center text-sm font-bold border-l border-black/15 hover:bg-black/5 transition-colors">
-              로그인
-            </a>
-          )}
-          {!user ? (
-            <Link to="/signup" className="px-4 h-full flex items-center text-sm font-bold bg-black text-[#a855f7] hover:bg-black/85 transition-colors gap-1.5">
-              합류하기 <span className="text-xs">→</span>
-            </Link>
-          ) : user?.role === "GUEST" ? (
-            <button onClick={handleCheckResult} className="px-4 h-full flex items-center text-sm font-bold bg-black text-[#a855f7] hover:bg-black/85 transition-colors gap-1.5">
-              결과 확인 <span className="text-xs">→</span>
-            </button>
-          ) : null}
-          <button
-            onClick={() => setShowMobileMenu(!showMobileMenu)}
-            className="w-12 h-full flex items-center justify-center border-l border-black/15 hover:bg-black/5 transition-colors"
-          >
-            <div className="space-y-1.5">
-              <div className="w-5 h-[2px] bg-black/70" />
-              <div className="w-5 h-[2px] bg-black/70" />
-              <div className="w-5 h-[2px] bg-black/70" />
-            </div>
-          </button>
-        </div>
-      </header>
-
-      {/* ── 모바일 메뉴 모달 ── */}
-      <AnimatePresence>
-        {showMobileMenu && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              onClick={() => setShowMobileMenu(false)}
-              className="md:hidden fixed inset-0 bg-black/30 backdrop-blur-md z-40"
-            />
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-              className="md:hidden fixed inset-5 top-20 bottom-auto bg-white z-50 flex flex-col shadow-2xl"
-            >
-              {/* X 닫기 버튼 */}
-              <div className="flex items-center justify-between px-6 pt-5 pb-3">
-                <span className="text-xs font-bold tracking-[0.2em] text-neutral-400">MENU</span>
-                <button
-                  onClick={() => setShowMobileMenu(false)}
-                  className="w-9 h-9 flex items-center justify-center border border-neutral-200 hover:bg-neutral-50 active:bg-neutral-100 transition-colors text-neutral-500 hover:text-neutral-800 font-bold text-sm"
-                >
-                  ✕
-                </button>
-              </div>
-
-              {/* 메뉴 항목 */}
-              {(isStaff
-                ? ["연혁", "스터디", "대회", "신청 관리"]
-                : ["연혁", "스터디", "대회"]
-              ).map((label, idx) => (
-                <motion.a
-                  key={label}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 + idx * 0.06, duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                  className="block mx-6 py-5 text-lg font-black tracking-tight text-neutral-900 hover:text-neutral-600 border-b border-neutral-100 transition-colors cursor-pointer"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setShowMobileMenu(false);
-                    if (label === "신청 관리") { window.location.href = "/admin/applications"; }
-                    else { alert("아직 개발중입니다."); }
-                  }}
-                >
-                  {label}
-                </motion.a>
-              ))}
-
-              {/* 하단 여백 */}
-              <div className="px-6 py-5">
-                <span className="text-[10px] font-bold tracking-[0.25em] text-neutral-300">SOLUTIO NEST</span>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* ── 모바일 타이포 + 그리드 래퍼 (뷰포트 채움) ── */}
-      <div className="lg:contents flex flex-col min-h-[calc(100dvh-3.5rem)]">
-
+    <div className="flex flex-col min-h-[calc(100dvh-3.5rem)] lg:block lg:min-h-0">
       {/* ── 모바일 전용: 타이포 + 모집일정 영역 ── */}
-      <div className="lg:hidden bg-[#a855f7] text-black border-b border-black/15 px-5 md:px-10 py-8">
+      <div className="lg:hidden bg-[#a855f7] text-black px-5 md:px-10 py-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={ready ? { opacity: 1, y: 0 } : {}}
@@ -203,7 +35,7 @@ export default function Hero({ showRecruitmentModal, onRecruitmentToggle }: Hero
           initial={{ opacity: 0, y: 20 }}
           animate={ready ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-8 space-y-5"
+          className="mt-6 space-y-5"
         >
           <p className="text-base md:text-lg font-semibold text-black/70 leading-relaxed">
             O(n<sup className="text-[0.7em]">n</sup>) 같은 인생,<br />
@@ -220,7 +52,7 @@ export default function Hero({ showRecruitmentModal, onRecruitmentToggle }: Hero
       </div>
 
       {/* ── 로고 그리드 영역 ── */}
-      <div id="hero-grid" className="bg-[#a855f7] text-black lg:min-h-[calc(100vh-3.5rem)] relative flex-1 min-h-[200px] overflow-hidden">
+      <div id="hero-grid" className="bg-[#a855f7] text-black lg:min-h-[calc(100vh-3.5rem)] relative flex-1 min-h-0 overflow-hidden">
         {/* 십자 교차점 */}
         {[
           { left: "33.333%", top: "28%" },
@@ -311,15 +143,6 @@ export default function Hero({ showRecruitmentModal, onRecruitmentToggle }: Hero
           )}
         </AnimatePresence>
       </div>
-
-      </div>{/* 래퍼 닫기 */}
-
-      <ResultModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        status={passStatus}
-        isLoading={isLoading}
-      />
-    </>
+    </div>
   );
 }

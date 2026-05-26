@@ -21,13 +21,18 @@ export default function Navbar() {
 
         {/* 가운데: 메뉴 */}
         <nav className="hidden md:flex items-center gap-8">
-          {["연혁", "스터디", "대회"].map((label) => (
+          {[
+            { label: "연혁", href: "#" },
+            { label: "스터디", href: "/study/seed" },
+            { label: "대회", href: "/competition" },
+          ].map((item) => (
             <a
-              key={label}
+              key={item.label}
+              href={item.href}
               className="text-[14px] font-medium text-neutral-500 hover:text-purple-600 transition-colors cursor-pointer"
-              onClick={(e) => { e.preventDefault(); alert("아직 개발중입니다."); }}
+              onClick={item.href === "#" ? (e) => { e.preventDefault(); alert("아직 개발중입니다."); } : undefined}
             >
-              {label}
+              {item.label}
             </a>
           ))}
 

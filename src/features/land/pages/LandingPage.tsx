@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Hero from "@/features/land/components/Hero";
 import Sections from "@/features/land/components/Sections";
@@ -13,34 +13,41 @@ export default function LandingPage() {
   const [active, setActive] = useState(-1);
   const [pastHero, setPastHero] = useState(false);
   const [showRecruitmentModal, setShowRecruitmentModal] = useState(false);
-  const heroGridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // 히어로 그리드를 지났는지 감지
-    const heroObs = new IntersectionObserver(
-      ([entry]) => setPastHero(!entry.isIntersecting),
-      { threshold: 0.1 }
-    );
-    const heroEl = document.getElementById("hero-grid");
-    if (heroEl) heroObs.observe(heroEl);
+    let ticking = false;
+    const handleScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        // 히어로 그리드를 지났는지 감지
+        const heroEl = document.getElementById("hero-grid");
+        if (heroEl) {
+          const isPast = heroEl.getBoundingClientRect().bottom <= window.innerHeight * 0.4;
+          setPastHero(isPast);
 
-    // 섹션 활성 상태 감지
-    const sectionObs: IntersectionObserver[] = [];
-    TOC.forEach((item, i) => {
-      const el = document.getElementById(item.id);
-      if (!el) return;
-      const obs = new IntersectionObserver(
-        ([entry]) => { if (entry.isIntersecting) setActive(i); },
-        { threshold: 0.4 }
-      );
-      obs.observe(el);
-      sectionObs.push(obs);
-    });
-
-    return () => {
-      heroObs.disconnect();
-      sectionObs.forEach((o) => o.disconnect());
+          if (!isPast) {
+            setActive(-1);
+          } else {
+            // 뷰포트 중앙 기준으로 활성 섹션 결정
+            const center = window.innerHeight / 2;
+            let newActive = 0;
+            for (let i = 0; i < TOC.length; i++) {
+              const el = document.getElementById(TOC[i].id);
+              if (el && el.getBoundingClientRect().top <= center) {
+                newActive = i;
+              }
+            }
+            setActive(newActive);
+          }
+        }
+        ticking = false;
+      });
     };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const scrollTo = (id: string) => {
@@ -50,8 +57,8 @@ export default function LandingPage() {
   return (
     <main className="lg:overflow-x-clip relative">
       {/* ── 데스크탑 좌측 패널 (absolute 래퍼 + sticky) ── */}
-      <div className="hidden lg:block absolute left-0 top-0 w-[38%] h-full z-20 pt-14">
-        <div className="sticky top-0 h-screen bg-[#a855f7] border-r border-black/15 flex flex-col justify-between px-10 xl:px-14 pt-12 pb-[calc(3rem+3.5rem)]">
+      <div className="hidden lg:block absolute left-0 top-0 w-[38%] h-full z-20">
+        <div className="sticky top-0 h-screen bg-[#a855f7] border-r border-black/15 flex flex-col justify-between px-10 xl:px-14 pt-12 pb-28">
           {/* 타이틀 */}
           <div>
             <h1 className="text-8xl xl:text-9xl font-black leading-[0.95] tracking-tighter text-black">
@@ -137,7 +144,7 @@ export default function LandingPage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="lg:hidden sticky top-14 z-10 bg-neutral-50/90 backdrop-blur-sm border-b border-neutral-200"
+              className="lg:hidden sticky top-0 z-10 bg-neutral-50/90 backdrop-blur-sm border-b border-neutral-200"
             >
               <div className="flex">
                 {TOC.map((item, i) => (

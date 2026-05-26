@@ -25,21 +25,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-neutral-100 text-black">
-      <header className="flex items-center justify-between border-b border-black/10 shrink-0">
-        <a href="/" className="flex items-center gap-3 px-5 md:px-6 py-4">
-          <img src="/logo.png" alt="SOLUTIO" className="h-8 w-8" />
-          <span className="hidden md:inline text-lg font-extrabold tracking-tight">SOLUTIO NEST</span>
-        </a>
-        <div className="flex items-center">
-          <Link to="/signup" className="px-4 py-4 text-sm font-bold border-l border-black/10 hover:bg-black/5 transition-colors">
-            입단 신청
-          </Link>
-          <Link to="/" className="px-5 py-4 text-sm font-bold border-l border-black/10 hover:bg-black/5 transition-colors">
-            홈으로
-          </Link>
-        </div>
-      </header>
-
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
