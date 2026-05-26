@@ -4,6 +4,7 @@ import LandingPage from "@/features/land/pages/LandingPage";
 import SignupPage from "@/features/auth/signup/pages/SignupPage";
 import LoginPage from "@/features/auth/login/pages/LoginPage";
 import ApplicationListPage from "@/features/admin/pages/ApplicationListPage";
+import StudyPage from "@/features/study/pages/StudyPage";
 
 export default function App() {
   const location = useLocation();
@@ -56,6 +57,22 @@ export default function App() {
               className="w-full h-full"
             >
               <LoginPage />
+            </motion.div>
+          }
+        />
+
+        {/* 스터디 페이지 */}
+        <Route
+          path="/study/:classId"
+          element={
+            <motion.div
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="w-full h-full"
+            >
+              <StudyPage />
             </motion.div>
           }
         />
