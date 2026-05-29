@@ -37,6 +37,7 @@ export default function PageHeader() {
 
   const navLinks = [
     { label: "대회", to: "/competition" },
+    { label: "연혁", to: "/history" },
     { label: "문의", to: "/contact" },
     ...(isAdmin ? [{ label: "신청 관리", to: "/admin/applications" }] : []),
   ];
