@@ -62,6 +62,9 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
         strong: ({ children }) => (
           <strong className="font-bold text-black">{children}</strong>
         ),
+        img: ({ src, alt }) => (
+          <img src={src} alt={alt ?? ""} className="w-full rounded-lg my-6" />
+        ),
         code: ({ children, className }) => {
           const isBlock = className?.includes("language-");
           if (isBlock) {

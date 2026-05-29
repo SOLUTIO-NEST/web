@@ -6,8 +6,8 @@ import LandingPage from "@/features/land/pages/LandingPage";
 import SignupPage from "@/features/auth/signup/pages/SignupPage";
 import LoginPage from "@/features/auth/login/pages/LoginPage";
 import ApplicationListPage from "@/features/admin/pages/ApplicationListPage";
-import StudyPage from "@/features/study/pages/StudyPage";
 import CompetitionPage from "@/features/competition/pages/CompetitionPage";
+import ContactPage from "@/features/contact/pages/ContactPage";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -72,21 +72,6 @@ export default function App() {
           />
 
           <Route
-            path="/study/:classId"
-            element={
-              <motion.div
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-                className="w-full h-full"
-              >
-                <StudyPage />
-              </motion.div>
-            }
-          />
-
-          <Route
             path="/competition"
             element={
               <motion.div
@@ -97,6 +82,21 @@ export default function App() {
                 className="w-full h-full"
               >
                 <CompetitionPage />
+              </motion.div>
+            }
+          />
+
+          <Route
+            path="/contact"
+            element={
+              <motion.div
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="w-full h-full"
+              >
+                <ContactPage />
               </motion.div>
             }
           />

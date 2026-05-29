@@ -77,11 +77,6 @@ export default function Sections() {
                 </div>
               ))}
             </div>
-            <p className="text-sm text-neutral-400 mt-4">
-              자세한 커리큘럼은{" "}
-              <Link to="/study/seed" className="underline text-black font-semibold hover:text-neutral-600 transition-colors">이곳</Link>
-              을 참고하세요.
-            </p>
           </div>
 
           <div>
@@ -100,7 +95,7 @@ export default function Sections() {
               </p>
             </div>
             <p className="text-sm text-neutral-400 mt-4">
-              자세한 대회 실적은{" "}
+              자세한 내용은{" "}
               <Link to="/competition" className="underline text-black font-semibold hover:text-neutral-600 transition-colors">이곳</Link>
               을 참고하세요.
             </p>

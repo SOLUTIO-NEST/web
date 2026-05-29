@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
-import { KGUPC_CONTENT } from "@/content/competition";
+import { CONTACT_CONTENT } from "@/content/contact";
 import MarkdownRenderer from "@/components/ui/MarkdownRenderer";
 
-export default function CompetitionPage() {
+export default function ContactPage() {
   return (
     <div className="min-h-screen bg-neutral-100 text-black">
       <motion.div
@@ -11,7 +11,7 @@ export default function CompetitionPage() {
         transition={{ duration: 0.4 }}
         className="max-w-3xl mx-auto px-5 md:px-10 py-8 md:py-12"
       >
-        <MarkdownRenderer content={KGUPC_CONTENT} />
+        <MarkdownRenderer content={CONTACT_CONTENT} />
       </motion.div>
     </div>
   );

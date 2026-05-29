@@ -36,8 +36,8 @@ export default function PageHeader() {
   };
 
   const navLinks = [
-    { label: "스터디", to: "/study/seed" },
     { label: "대회", to: "/competition" },
+    { label: "문의", to: "/contact" },
     ...(isAdmin ? [{ label: "신청 관리", to: "/admin/applications" }] : []),
   ];
 

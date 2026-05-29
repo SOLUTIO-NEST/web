@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
@@ -6,6 +6,11 @@ import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
   const [studentId, setStudentId] = useState("");
+
+  useEffect(() => {
+    document.documentElement.style.overflow = "hidden";
+    return () => { document.documentElement.style.overflow = ""; };
+  }, []);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -24,7 +29,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-neutral-100 text-black">
+    <div className="h-[calc(100dvh-3.5rem)] overflow-hidden flex flex-col bg-neutral-100 text-black">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -43,63 +48,50 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <div className="flex-1 flex flex-col">
-          <form noValidate onSubmit={handleSubmit} className="flex flex-col h-full">
-            <div className="flex-1 px-5 md:px-10 lg:px-16 py-6">
-              <div className="border-b border-black/10 py-5 flex flex-col md:flex-row md:items-center gap-1 md:gap-0">
-                <label className="text-sm font-bold text-black/80 md:w-40 shrink-0">
-                  학번 *
-                </label>
-                <div className="flex-1">
-                  <input
-                    type="text"
-                    value={studentId}
-                    onChange={(e) => setStudentId(e.target.value)}
-                    placeholder="202400000"
-                    className="w-full bg-transparent text-base font-medium placeholder:text-black/25 outline-none py-1"
-                  />
-                </div>
-              </div>
-
-              <div className="border-b border-black/10 py-5 flex flex-col md:flex-row md:items-center gap-1 md:gap-0">
-                <label className="text-sm font-bold text-black/80 md:w-40 shrink-0">
-                  비밀번호 *
-                </label>
-                <div className="flex-1 relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="비밀번호를 입력하세요"
-                    className="w-full bg-transparent text-base font-medium placeholder:text-black/25 outline-none py-1"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 text-black/40 hover:text-black transition"
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-              </div>
-
-              {error && (
-                <div className="py-4 text-red-600 text-sm font-medium">
-                  {error}
-                </div>
-              )}
-
-              <div className="pt-6">
-                <p className="text-sm text-black/50">
-                  계정이 없으신가요?{" "}
-                  <Link to="/signup" className="text-black font-bold underline hover:text-black/60 transition-colors">
-                    입단 신청하기
-                  </Link>
-                </p>
+        <div className="flex-1 flex flex-col justify-center">
+          <form noValidate onSubmit={handleSubmit} className="px-5 md:px-10 lg:px-16 w-full max-w-2xl">
+            <div className="border-b border-black/10 py-5 flex flex-col md:flex-row md:items-center gap-1 md:gap-0">
+              <label className="text-sm font-bold text-black/80 md:w-40 shrink-0">
+                학번 *
+              </label>
+              <div className="flex-1">
+                <input
+                  type="text"
+                  value={studentId}
+                  onChange={(e) => setStudentId(e.target.value)}
+                  placeholder="202400000"
+                  className="w-full bg-transparent text-base font-medium placeholder:text-black/25 outline-none py-1"
+                />
               </div>
             </div>
 
-            <div className="px-5 md:px-10 lg:px-16 py-6 border-t border-black/10">
+            <div className="border-b border-black/10 py-5 flex flex-col md:flex-row md:items-center gap-1 md:gap-0">
+              <label className="text-sm font-bold text-black/80 md:w-40 shrink-0">
+                비밀번호 *
+              </label>
+              <div className="flex-1 relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="비밀번호를 입력하세요"
+                  className="w-full bg-transparent text-base font-medium placeholder:text-black/25 outline-none py-1 pr-8"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 text-black/40 hover:text-black transition"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            {error && (
+              <div className="py-4 text-red-600 text-sm font-medium">{error}</div>
+            )}
+
+            <div className="mt-8 flex items-center justify-between">
               <button
                 type="submit"
                 className="px-6 py-3 bg-black text-white font-bold text-sm hover:bg-black/85 transition-colors flex items-center gap-2"
@@ -107,6 +99,15 @@ export default function LoginPage() {
                 로그인
                 <span>→</span>
               </button>
+              <p className="text-sm text-black/50">
+                계정이 없으신가요?{" "}
+                <Link
+                  to="/signup"
+                  className="text-black font-bold underline hover:text-black/60 transition-colors"
+                >
+                  입단 신청
+                </Link>
+              </p>
             </div>
           </form>
         </div>

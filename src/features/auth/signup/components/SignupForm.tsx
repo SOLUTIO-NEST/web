@@ -105,7 +105,7 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
   const currentStep = STEPS[step];
 
   return (
-    <form noValidate onSubmit={handleSubmit} className="flex flex-col h-full">
+    <form noValidate onSubmit={handleSubmit}>
       {/* 스텝 표시 */}
       <div className="px-5 md:px-10 lg:px-16 py-6 border-b border-black/10">
         <span className="text-sm font-bold tracking-wide text-black/40">
@@ -114,7 +114,7 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
       </div>
 
       {/* 폼 필드 영역 */}
-      <div className="flex-1 px-5 md:px-10 lg:px-16 py-6">
+      <div className="px-5 md:px-10 lg:px-16 py-6">
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
