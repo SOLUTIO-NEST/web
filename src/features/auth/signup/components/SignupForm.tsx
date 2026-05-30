@@ -73,14 +73,6 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
     validateField(name, newValue);
   };
 
-  const canProceed = () => {
-    const currentFields = STEPS[step].fields.filter(f => f !== "motivation" && f !== "privacy");
-    return currentFields.every(f => {
-      const value = form[f as keyof typeof form];
-      return value.trim() !== "" && !errors[f];
-    });
-  };
-
   const handleNext = () => {
     const currentFields = STEPS[step].fields.filter(f => f !== "motivation" && f !== "privacy");
     let valid = true;
