@@ -216,7 +216,7 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
                       <span className="font-bold text-black">[필수]</span> 개인정보 수집 및 이용에 동의합니다.
                       <button
                         type="button"
-                        onClick={() => setIsPrivacyPolicyOpen(true)}
+                        onClick={(e) => { e.preventDefault(); setIsPrivacyPolicyOpen(true); }}
                         className="text-black underline ml-2 hover:text-black/60 font-medium"
                       >
                         내용 보기
