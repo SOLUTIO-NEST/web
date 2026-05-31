@@ -52,17 +52,9 @@ export default function RecruitmentInfoModal({ onClose }: RecruitmentInfoModalPr
       className="absolute inset-0 lg:inset-auto lg:left-0 lg:bottom-0 lg:w-[66.666%] lg:h-[72%] bg-white z-10 flex flex-col overflow-hidden"
     >
       {/* 헤더 */}
-      <div className="flex items-center justify-between px-5 md:px-8 py-4 border-b border-neutral-200 shrink-0">
-        <div>
-          <h2 className="text-xl md:text-2xl font-black tracking-tighter text-neutral-900">모집일정</h2>
-          <span className="text-[10px] font-bold tracking-[0.25em] text-neutral-400 mt-0.5 block">RECRUITMENT SCHEDULE</span>
-        </div>
-        <button
-          onClick={onClose}
-          className="w-9 h-9 flex items-center justify-center border border-neutral-200 hover:bg-neutral-50 active:bg-neutral-100 transition-colors text-neutral-500 hover:text-neutral-800 font-bold text-sm"
-        >
-          ✕
-        </button>
+      <div className="px-5 md:px-8 py-4 border-b border-neutral-200 shrink-0">
+        <h2 className="text-xl md:text-2xl font-black tracking-tighter text-neutral-900">모집일정</h2>
+        <span className="text-[10px] font-bold tracking-[0.25em] text-neutral-400 mt-0.5 block">RECRUITMENT SCHEDULE</span>
       </div>
 
       {/* 콘텐츠 */}

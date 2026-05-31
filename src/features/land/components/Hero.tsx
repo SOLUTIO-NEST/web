@@ -42,8 +42,8 @@ export default function Hero({ showRecruitmentModal, onRecruitmentToggle }: Hero
             O(1)로 바꿔보자.
           </p>
           <button
-            onClick={() => onRecruitmentToggle(true)}
-            className="px-6 py-3 bg-black text-[#a855f7] font-bold text-base hover:bg-black/85 transition-colors flex items-center gap-2"
+            onClick={() => onRecruitmentToggle(!showRecruitmentModal)}
+            className="relative z-20 px-6 py-3 bg-black text-[#a855f7] font-bold text-base hover:bg-black/85 transition-colors flex items-center gap-2"
           >
             모집일정
             <span>→</span>
