@@ -195,12 +195,12 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
                   <textarea
                     placeholder="지원 동기를 자유롭게 작성해주세요"
                     rows={4}
-                    maxLength={256}
+                    maxLength={255}
                     value={motivation}
                     onChange={(e) => setMotivation(e.target.value)}
                     className="w-full bg-transparent text-base font-medium placeholder:text-black/25 outline-none resize-none"
                   />
-                  <p className="text-right text-xs text-black/30 mt-1">{motivation.length} / 256</p>
+                  <p className="text-right text-xs text-black/30 mt-1">{motivation.length} / 255</p>
                 </div>
 
                 <div className="py-5">
