@@ -65,9 +65,9 @@ export default function Sections() {
             </p>
             <div className="space-y-4">
               {[
-                { name: "Seed", desc: "기초 알고리즘을 학습합니다." },
-                { name: "Branch", desc: "고급 알고리즘을 학습합니다." },
-                { name: "Tree", desc: "자율적으로 팀을 구성해, 대회 준비 및 코딩 테스트 준비를 합니다." },
+                { name: "Seed", desc: "기초 자료구조를 학습합니다." },
+                { name: "Branch", desc: "기초 알고리즘을 학습합니다." },
+                { name: "Tree", desc: "자율적으로 팀을 구성해, 대회나 코딩 테스트 등을 준비 합니다." },
               ].map((tier) => (
                 <div key={tier.name} className="flex items-start gap-4 py-3 border-b border-neutral-100">
                   <span className="text-sm font-black tracking-tight bg-neutral-900 text-white px-3 py-1 shrink-0">
@@ -77,6 +77,11 @@ export default function Sections() {
                 </div>
               ))}
             </div>
+            <p className="text-sm text-neutral-400 mt-4">
+              자세한 내용은{" "}
+              <Link to="/study" className="underline text-black font-semibold hover:text-neutral-600 transition-colors">이곳</Link>
+              을 참고하세요.
+            </p>
           </div>
 
           <div>

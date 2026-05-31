@@ -36,6 +36,7 @@ export default function PageHeader() {
   };
 
   const navLinks = [
+    { label: "스터디", to: "/study" },
     { label: "대회", to: "/competition" },
     { label: "연혁", to: "/history" },
     { label: "문의", to: "/contact" },
