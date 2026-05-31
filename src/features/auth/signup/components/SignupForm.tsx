@@ -43,6 +43,7 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
     switch (name) {
       case "email":
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) error = "올바른 이메일 형식이 아닙니다.";
+        else if (!/^[^\s@]+@(kyonggi\.ac\.kr|kgu\.ac\.kr)$/.test(value)) error = "학교 이메일(kyonggi.ac.kr 또는 kgu.ac.kr)만 사용 가능합니다.";
         break;
       case "password":
         if (value.length < 8 || value.length > 12 || !/[a-zA-Z]/.test(value) || !/[0-9]/.test(value) || !/[!@#$%^&*(),.?\":{}|<>]/.test(value))
