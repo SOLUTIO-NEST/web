@@ -222,9 +222,9 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
                       </button>
                     </label>
                   </div>
-                  {!isAgreed && isTriedSubmit && (
-                    <p className="text-red-600 text-xs mt-2 ml-8">개인정보 수집 및 이용에 동의해야 신청이 가능합니다.</p>
-                  )}
+                  <p className={`text-red-600 text-xs mt-2 ml-8 ${!isAgreed && isTriedSubmit ? "visible" : "invisible"}`}>
+                    개인정보 수집 및 이용에 동의해야 신청이 가능합니다.
+                  </p>
                 </div>
               </>
             )}
