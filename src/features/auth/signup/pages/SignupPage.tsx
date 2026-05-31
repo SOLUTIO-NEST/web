@@ -62,7 +62,7 @@ export default function SignupPage() {
             <div className="lg:w-[38%] lg:border-r border-b lg:border-b-0 border-black/10 flex flex-col justify-between px-5 md:px-10 py-8 md:py-12">
               <div>
                 <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-[0.95] tracking-tighter">
-                  입단<br />신청
+                  입단 신청
                 </h1>
               </div>
               <div className="mt-8 lg:mt-0 space-y-6">
