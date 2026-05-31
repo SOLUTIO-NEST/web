@@ -128,7 +128,7 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
                   <label className="text-sm font-bold text-black/80 md:w-40 shrink-0">
                     {config.label}
                   </label>
-                  <div className="flex-1 relative">
+                  <div className="flex-1">
                     <input
                       name={fieldKey}
                       type={isPassword ? (showPassword ? "text" : "password") : "text"}
@@ -138,17 +138,17 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
                       maxLength={fieldKey === "phone" ? 13 : undefined}
                       className="w-full bg-transparent text-base font-medium placeholder:text-black/25 outline-none py-1"
                     />
-                    {isPassword && (
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 text-black/40 hover:text-black transition"
-                      >
-                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                      </button>
-                    )}
                   </div>
                   {error && <p className="text-red-600 text-xs mt-1 md:mt-0 md:ml-4 shrink-0">{error}</p>}
+                  {isPassword && (
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="ml-3 text-black/40 hover:text-black transition shrink-0"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  )}
                 </div>
               );
             })}
