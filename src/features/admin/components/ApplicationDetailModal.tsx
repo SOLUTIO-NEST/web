@@ -1,188 +1,225 @@
 import { useState, useEffect } from "react";
 import { type ApplicantResponseDto } from "@/services/types";
 import { motion } from "framer-motion";
-import { X, Phone, Mail, Award, BookOpen, Calendar, GraduationCap } from "lucide-react";
-import Badge from "@/components/ui/Badge";
-import Button from "@/components/ui/Button";
-import Select from "@/components/ui/Select";
+import { ChevronDown } from "lucide-react";
 
 const CLASS_LEVELS = [
-    { value: '', label: '미정' },
-    { value: 'SEED', label: 'Seed' },
-    { value: 'BRANCH', label: 'Branch' },
-    { value: 'TREE', label: 'Tree' },
+  { value: "", label: "미정" },
+  { value: "SEED", label: "Seed" },
+  { value: "BRANCH", label: "Branch" },
+  { value: "TREE", label: "Tree" },
 ] as const;
 
 function normalizeClassLevel(raw: string | null | undefined): string {
-    if (!raw || raw === '미정') return '';
-    const upper = raw.toUpperCase();
-    if (['SEED', 'BRANCH', 'TREE'].includes(upper)) return upper;
-    const map: Record<string, string> = { Seed: 'SEED', Branch: 'BRANCH', Tree: 'TREE' };
-    return map[raw] ?? '';
+  if (!raw || raw === "미정") return "";
+  const upper = raw.toUpperCase();
+  if (["SEED", "BRANCH", "TREE"].includes(upper)) return upper;
+  const map: Record<string, string> = { Seed: "SEED", Branch: "BRANCH", Tree: "TREE" };
+  return map[raw] ?? "";
 }
 
 interface Props {
-    app: ApplicantResponseDto;
-    onClose: () => void;
-    onUpdateStatus: (isApprove: boolean) => void;
-    onUpdateClassLevel: (classLevel: string | null) => void;
+  app: ApplicantResponseDto;
+  onClose: () => void;
+  onUpdateStatus: (isApprove: boolean) => void;
+  onUpdateClassLevel: (classLevel: string | null) => void;
 }
 
-export default function ApplicationDetailModal({ app, onClose, onUpdateStatus, onUpdateClassLevel }: Props) {
-    // Helper to determine status string/variant
-    const getStatusInfo = (isApprove: boolean | null) => {
-        if (isApprove === true) return { label: '합격', variant: 'success' as const };
-        if (isApprove === false) return { label: '불합격', variant: 'error' as const };
-        return { label: '대기중', variant: 'warning' as const };
+export default function ApplicationDetailModal({
+  app,
+  onClose,
+  onUpdateStatus,
+  onUpdateClassLevel,
+}: Props) {
+  const [detail, setDetail] = useState<ApplicantResponseDto & { isLoading?: boolean }>({
+    ...app,
+    isLoading: true,
+  });
+  const [selectedLevel, setSelectedLevel] = useState<string>(normalizeClassLevel(app.classLevel));
+
+  useEffect(() => {
+    setDetail((prev) => ({ ...prev, isApprove: app.isApprove }));
+  }, [app.isApprove]);
+
+  useEffect(() => {
+    const fetchDetail = async () => {
+      try {
+        const fullData = await import("@/services/api").then((m) =>
+          m.applicantService.getDetail(app.studentId)
+        );
+        setDetail({ ...fullData, isLoading: false });
+        setSelectedLevel(normalizeClassLevel(fullData.classLevel));
+      } catch (e) {
+        console.error("Failed to fetch detail", e);
+        setDetail((prev) => ({ ...prev, isLoading: false }));
+      }
     };
+    fetchDetail();
+  }, [app.studentId]);
 
-    const [detail, setDetail] = useState<ApplicantResponseDto & { isLoading?: boolean }>({ ...app, isLoading: true });
-    const [selectedLevel, setSelectedLevel] = useState<string>(normalizeClassLevel(app.classLevel));
+  const statusLabel =
+    detail.isApprove === true ? "합격" : detail.isApprove === false ? "불합격" : "대기중";
+  const statusStyle =
+    detail.isApprove === true
+      ? "border-green-400 text-green-700 bg-green-50"
+      : detail.isApprove === false
+        ? "border-red-300 text-red-600 bg-red-50"
+        : "border-neutral-300 text-neutral-500";
 
-    useEffect(() => {
-        setDetail(prev => ({ ...prev, isApprove: app.isApprove }));
-    }, [app.isApprove]);
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+      />
 
-    useEffect(() => {
-        const fetchDetail = async () => {
-            try {
-                // If we already have the details in props (implied by non-null fields), skip? 
-                // But current props are summary.
-                const fullData = await import("@/services/api").then(m => m.applicantService.getDetail(app.studentId));
-                setDetail({ ...fullData, isLoading: false });
-                setSelectedLevel(normalizeClassLevel(fullData.classLevel));
-            } catch (e) {
-                console.error("Failed to fetch detail", e);
-                setDetail(prev => ({ ...prev, isLoading: false }));
-            }
-        };
-        fetchDetail();
-    }, [app.studentId]);
-
-    const statusInfo = getStatusInfo(detail.isApprove);
-
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={onClose}
-                className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-            />
-
-            <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="relative bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 20 }}
+        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+        className="relative bg-white w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+      >
+        {/* 헤더 */}
+        <div className="px-5 md:px-8 py-5 border-b border-neutral-200 shrink-0">
+          <div className="flex items-start justify-between">
+            <div>
+              <span className="text-[10px] font-bold tracking-[0.25em] text-neutral-400 block mb-1">
+                APPLICANT DETAIL
+              </span>
+              <h2 className="text-2xl font-black tracking-tighter text-neutral-900">
+                {detail.name}
+              </h2>
+              <div className="flex items-center gap-2 mt-1.5">
+                <span className="text-sm text-neutral-500 font-medium">{detail.department}</span>
+                <span className="text-neutral-300">|</span>
+                <span className="text-sm text-neutral-500 font-mono">{detail.studentId}</span>
+              </div>
+            </div>
+            <span
+              className={`px-2.5 py-0.5 text-[10px] font-bold tracking-widest border shrink-0 ${statusStyle}`}
             >
-                {/* Header */}
-                <div className="flex items-start justify-between p-6 border-b border-gray-100 bg-gray-50/50">
-                    <div className="flex gap-4">
-                        <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center text-2xl">
-                            🎓
-                        </div>
-                        <div>
-                            <h2 className="text-xl font-bold text-gray-900">{detail.name}</h2>
-                            <div className="text-sm text-gray-500 mt-1 flex flex-wrap gap-2">
-                                <span>{detail.department}</span>
-                                <span className="text-gray-300">|</span>
-                                <span className="font-mono">{detail.studentId}</span>
-                            </div>
-                            <div className="mt-3">
-                                <Badge variant={statusInfo.variant}>
-                                    {statusInfo.label}
-                                </Badge>
-                            </div>
-                        </div>
-                    </div>
-                    <button
-                        onClick={onClose}
-                        className="p-2 rounded-full hover:bg-gray-200 transition text-gray-500"
-                    >
-                        <X size={20} />
-                    </button>
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                    {detail.isLoading && (
-                        <div className="flex justify-center items-center py-10">
-                            <span className="text-purple-600 animate-spin mr-2">⏳</span> 로딩중...
-                        </div>
-                    )}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <InfoItem icon={<Mail size={18} />} label="이메일" value={detail.email || '-'} />
-                        <InfoItem icon={<Phone size={18} />} label="전화번호" value={detail.phoneNumber || detail.phone || '-'} />
-                        <InfoItem icon={<Award size={18} />} label="백준 ID" value={detail.bojId || detail.baekjoonId || '-'} />
-                        <InfoItem icon={<BookOpen size={18} />} label="주력 언어" value={detail.mainLanguage || detail.language || '-'} />
-                        <InfoItem icon={<Calendar size={18} />} label="신청일" value={detail.createdAt ? new Date(detail.createdAt).toLocaleDateString() : '-'} />
-                        <InfoItem
-                            icon={<GraduationCap size={18} />}
-                            label="배정 반"
-                            value={CLASS_LEVELS.find(l => l.value === normalizeClassLevel(detail.classLevel))?.label ?? '미정'}
-                        />
-                    </div>
-
-                    <div className="border-t border-gray-100 pt-6">
-                        <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                            <span className="text-purple-600">✍️</span> 지원 동기
-                        </h3>
-                        <div className="bg-gray-50 rounded-xl p-4 text-gray-700 leading-relaxed whitespace-pre-wrap text-sm">
-                            {detail.applyReason || detail.motivation || "작성된 지원 동기가 없습니다."}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Footer Actions */}
-                <div className="p-6 border-t border-gray-100 bg-gray-50/50 space-y-3">
-                    {/* Class Level */}
-                    <div className="flex items-center gap-2">
-                        <Select
-                            value={selectedLevel}
-                            onChange={(e) => setSelectedLevel(e.target.value)}
-                            className="flex-1 text-sm h-10"
-                        >
-                            {CLASS_LEVELS.map((l) => (
-                                <option key={l.value} value={l.value}>{l.label}</option>
-                            ))}
-                        </Select>
-                        <Button
-                            variant="brandSoft"
-                            className="h-10 px-4 text-sm shrink-0"
-                            onClick={() => onUpdateClassLevel(selectedLevel === '' ? null : selectedLevel)}
-                        >
-                            반 저장
-                        </Button>
-                    </div>
-                    {/* Approve / Reject */}
-                    <div className="flex items-center justify-end gap-3">
-                        {detail.isApprove !== true && (
-                            <Button onClick={() => onUpdateStatus(true)} variant="success">
-                                합격 처리
-                            </Button>
-                        )}
-                        {detail.isApprove !== false && (
-                            <Button onClick={() => onUpdateStatus(false)} variant="danger">
-                                불합격 처리
-                            </Button>
-                        )}
-                    </div>
-                </div>
-            </motion.div>
+              {statusLabel}
+            </span>
+          </div>
         </div>
-    );
+
+        {/* 콘텐츠 */}
+        <div className="flex-1 overflow-y-auto px-5 md:px-8 py-5 space-y-5">
+          {detail.isLoading && (
+            <div className="flex flex-col items-center justify-center py-10 gap-3">
+              <div className="w-5 h-5 border-2 border-neutral-200 border-t-neutral-500 rounded-full animate-spin" />
+              <span className="text-sm font-semibold text-neutral-400">불러오는 중...</span>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <InfoItem label="EMAIL" value={detail.email || "-"} />
+            <InfoItem label="PHONE" value={detail.phoneNumber || detail.phone || "-"} />
+            <InfoItem label="BAEKJOON" value={detail.bojId || detail.baekjoonId || "-"} />
+            <InfoItem label="LANGUAGE" value={detail.mainLanguage || detail.language || "-"} />
+            <InfoItem
+              label="APPLIED"
+              value={detail.createdAt ? new Date(detail.createdAt).toLocaleDateString() : "-"}
+            />
+            <InfoItem
+              label="CLASS"
+              value={
+                CLASS_LEVELS.find((l) => l.value === normalizeClassLevel(detail.classLevel))
+                  ?.label ?? "미정"
+              }
+            />
+          </div>
+
+          <div className="border-t border-neutral-200 pt-5">
+            <span className="text-[10px] font-bold tracking-[0.25em] text-neutral-400 block mb-3">
+              MOTIVATION
+            </span>
+            <div className="bg-neutral-50 border border-neutral-200 p-4 text-sm text-neutral-700 leading-relaxed whitespace-pre-wrap">
+              {detail.applyReason || detail.motivation || "작성된 지원 동기가 없습니다."}
+            </div>
+          </div>
+        </div>
+
+        {/* 하단 */}
+        <div className="px-5 md:px-8 py-4 border-t border-neutral-200 shrink-0 space-y-3">
+          {/* 반 배정 */}
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <select
+                value={selectedLevel}
+                onChange={(e) => setSelectedLevel(e.target.value)}
+                className="w-full appearance-none border border-neutral-300 bg-white px-3 py-2 pr-8 text-sm font-medium outline-none focus:border-black transition-colors"
+              >
+                {CLASS_LEVELS.map((l) => (
+                  <option key={l.value} value={l.value}>
+                    {l.label}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown
+                size={14}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => onUpdateClassLevel(selectedLevel === "" ? null : selectedLevel)}
+              className="px-4 py-2 border border-neutral-300 text-sm font-bold hover:bg-neutral-50 transition-colors shrink-0"
+            >
+              반 저장
+            </button>
+          </div>
+
+          {/* 합격/불합격 + 닫기 */}
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold tracking-[0.25em] text-neutral-300">
+              SOLUTIO NEST
+            </span>
+            <div className="flex items-center gap-2">
+              {detail.isApprove !== false && (
+                <button
+                  type="button"
+                  onClick={() => onUpdateStatus(false)}
+                  className="px-4 py-2 border border-neutral-300 text-sm font-bold text-red-600 hover:bg-red-50 hover:border-red-200 transition-colors"
+                >
+                  불합격
+                </button>
+              )}
+              {detail.isApprove !== true && (
+                <button
+                  type="button"
+                  onClick={() => onUpdateStatus(true)}
+                  className="px-4 py-2 bg-neutral-900 text-white text-sm font-bold hover:bg-neutral-800 transition-colors"
+                >
+                  합격
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 border border-neutral-300 text-sm font-bold text-neutral-600 hover:bg-neutral-50 transition-colors"
+              >
+                닫기
+              </button>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
 }
 
-function InfoItem({ icon, label, value }: { icon: any, label: string, value: string }) {
-    return (
-        <div className="flex items-start gap-3">
-            <div className="mt-0.5 text-gray-400">{icon}</div>
-            <div>
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{label}</p>
-                <p className="text-gray-900 font-medium">{value}</p>
-            </div>
-        </div>
-    )
+function InfoItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="py-3 border-b border-neutral-100">
+      <span className="text-[10px] font-bold tracking-[0.15em] text-neutral-400 block mb-1">
+        {label}
+      </span>
+      <span className="text-sm font-bold text-neutral-900">{value}</span>
+    </div>
+  );
 }
