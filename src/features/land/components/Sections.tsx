@@ -20,7 +20,7 @@ export default function Sections() {
             ABOUT SOLUTIO
           </span>
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter leading-[1.1] mb-8">
-            Solutio에<br />대해
+            Solutio에 대해
           </h2>
           <div className="space-y-4 text-base md:text-lg text-neutral-600 leading-relaxed font-medium">
             <p>
@@ -55,7 +55,7 @@ export default function Sections() {
             ACTIVITIES
           </span>
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter leading-[1.1] mb-12">
-            주요<br />활동
+            주요 활동
           </h2>
 
           <div className="mb-14">
@@ -65,9 +65,9 @@ export default function Sections() {
             </p>
             <div className="space-y-4">
               {[
-                { name: "Seed", desc: "기초 알고리즘을 학습합니다." },
-                { name: "Branch", desc: "고급 알고리즘을 학습합니다." },
-                { name: "Tree", desc: "자율적으로 팀을 구성해, 대회 준비 및 코딩 테스트 준비를 합니다." },
+                { name: "Seed", desc: "기초 자료구조를 학습합니다." },
+                { name: "Branch", desc: "기초 알고리즘을 학습합니다." },
+                { name: "Tree", desc: "자율적으로 팀을 구성해, 대회나 코딩 테스트 등을 준비 합니다." },
               ].map((tier) => (
                 <div key={tier.name} className="flex items-start gap-4 py-3 border-b border-neutral-100">
                   <span className="text-sm font-black tracking-tight bg-neutral-900 text-white px-3 py-1 shrink-0">
@@ -77,6 +77,11 @@ export default function Sections() {
                 </div>
               ))}
             </div>
+            <p className="text-sm text-neutral-400 mt-4">
+              자세한 내용은{" "}
+              <Link to="/study" className="underline text-black font-semibold hover:text-neutral-600 transition-colors">이곳</Link>
+              을 참고하세요.
+            </p>
           </div>
 
           <div>
@@ -119,7 +124,7 @@ export default function Sections() {
             JOIN US
           </span>
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter leading-[1.1] mb-8">
-            가입<br />방법
+            가입 방법
           </h2>
           <p className="text-base md:text-lg text-neutral-600 font-medium leading-relaxed mb-10">
             상단의 <span className="text-black font-bold">합류하기</span>를 통해 신청해주세요!

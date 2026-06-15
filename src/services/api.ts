@@ -14,15 +14,12 @@ import type {
 
 export const authService = {
     login: async (data: LoginRequestDto): Promise<TokenResponse> => {
-        const response = await axiosInstance.post<ApiResponse<any>>('/login', data); // data might be null in body but tokens in header
-        // Tokens are in X-Solutio-Auth header
-        const authHeader = response.headers['x-solutio-auth'];
-        if (!authHeader) {
+        const response = await axiosInstance.post<ApiResponse<TokenResponse>>('/login', data);
+        const tokens = response.data.data;
+        if (!tokens) {
             throw new Error('Authentication failed: Missing tokens');
         }
-        const tokens = typeof authHeader === 'string' ? JSON.parse(authHeader) : authHeader;
 
-        // Store tokens
         localStorage.setItem('accessToken', tokens.accessToken);
         localStorage.setItem('refreshToken', tokens.refreshToken);
 

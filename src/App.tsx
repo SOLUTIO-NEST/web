@@ -9,6 +9,7 @@ import ApplicationListPage from "@/features/admin/pages/ApplicationListPage";
 import CompetitionPage from "@/features/competition/pages/CompetitionPage";
 import HistoryPage from "@/features/history/pages/HistoryPage";
 import ContactPage from "@/features/contact/pages/ContactPage";
+import StudyPage from "@/features/study/pages/StudyPage";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -98,6 +99,21 @@ export default function App() {
                 className="w-full h-full"
               >
                 <HistoryPage />
+              </motion.div>
+            }
+          />
+
+          <Route
+            path="/study"
+            element={
+              <motion.div
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="w-full h-full"
+              >
+                <StudyPage />
               </motion.div>
             }
           />

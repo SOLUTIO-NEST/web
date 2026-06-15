@@ -85,7 +85,7 @@ export default function LandingPage() {
                   O(1)로 바꿔보자.
                 </p>
                 <button
-                  onClick={() => setShowRecruitmentModal(true)}
+                  onClick={() => setShowRecruitmentModal(!showRecruitmentModal)}
                   className="px-6 py-3 bg-black text-[#a855f7] font-bold text-base hover:bg-black/85 transition-colors flex items-center gap-2"
                 >
                   모집일정

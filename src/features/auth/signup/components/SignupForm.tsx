@@ -43,6 +43,7 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
     switch (name) {
       case "email":
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) error = "올바른 이메일 형식이 아닙니다.";
+        else if (!/^[^\s@]+@(kyonggi\.ac\.kr|kgu\.ac\.kr)$/.test(value)) error = "학교 이메일(kyonggi.ac.kr 또는 kgu.ac.kr)만 사용 가능합니다.";
         break;
       case "password":
         if (value.length < 8 || value.length > 12 || !/[a-zA-Z]/.test(value) || !/[0-9]/.test(value) || !/[!@#$%^&*(),.?\":{}|<>]/.test(value))
@@ -128,7 +129,7 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
                   <label className="text-sm font-bold text-black/80 md:w-40 shrink-0">
                     {config.label}
                   </label>
-                  <div className="flex-1 relative">
+                  <div className="flex-1">
                     <input
                       name={fieldKey}
                       type={isPassword ? (showPassword ? "text" : "password") : "text"}
@@ -138,17 +139,17 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
                       maxLength={fieldKey === "phone" ? 13 : undefined}
                       className="w-full bg-transparent text-base font-medium placeholder:text-black/25 outline-none py-1"
                     />
-                    {isPassword && (
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 text-black/40 hover:text-black transition"
-                      >
-                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                      </button>
-                    )}
                   </div>
                   {error && <p className="text-red-600 text-xs mt-1 md:mt-0 md:ml-4 shrink-0">{error}</p>}
+                  {isPassword && (
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="ml-3 text-black/40 hover:text-black transition shrink-0"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  )}
                 </div>
               );
             })}
@@ -194,12 +195,12 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
                   <textarea
                     placeholder="지원 동기를 자유롭게 작성해주세요"
                     rows={4}
-                    maxLength={256}
+                    maxLength={255}
                     value={motivation}
                     onChange={(e) => setMotivation(e.target.value)}
                     className="w-full bg-transparent text-base font-medium placeholder:text-black/25 outline-none resize-none"
                   />
-                  <p className="text-right text-xs text-black/30 mt-1">{motivation.length} / 256</p>
+                  <p className="text-right text-xs text-black/30 mt-1">{motivation.length} / 255</p>
                 </div>
 
                 <div className="py-5">
@@ -215,16 +216,16 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
                       <span className="font-bold text-black">[필수]</span> 개인정보 수집 및 이용에 동의합니다.
                       <button
                         type="button"
-                        onClick={() => setIsPrivacyPolicyOpen(true)}
+                        onClick={(e) => { e.preventDefault(); setIsPrivacyPolicyOpen(true); }}
                         className="text-black underline ml-2 hover:text-black/60 font-medium"
                       >
                         내용 보기
                       </button>
                     </label>
                   </div>
-                  {!isAgreed && isTriedSubmit && (
-                    <p className="text-red-600 text-xs mt-2 ml-8">개인정보 수집 및 이용에 동의해야 신청이 가능합니다.</p>
-                  )}
+                  <p className={`text-red-600 text-xs mt-2 ml-8 ${!isAgreed && isTriedSubmit ? "visible" : "invisible"}`}>
+                    개인정보 수집 및 이용에 동의해야 신청이 가능합니다.
+                  </p>
                 </div>
               </>
             )}
