@@ -6,6 +6,7 @@ import LandingPage from "@/features/land/pages/LandingPage";
 import SignupPage from "@/features/auth/signup/pages/SignupPage";
 import LoginPage from "@/features/auth/login/pages/LoginPage";
 import ApplicationListPage from "@/features/admin/pages/ApplicationListPage";
+import BlacklistPage from "@/features/admin/pages/BlacklistPage";
 import CompetitionPage from "@/features/competition/pages/CompetitionPage";
 import HistoryPage from "@/features/history/pages/HistoryPage";
 import ContactPage from "@/features/contact/pages/ContactPage";
@@ -136,6 +137,10 @@ export default function App() {
           <Route
             path="/admin/applications"
             element={<ApplicationListPage />}
+          />
+          <Route
+            path="/admin/blacklist"
+            element={<BlacklistPage />}
           />
         </Routes>
       </AnimatePresence>

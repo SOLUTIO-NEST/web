@@ -78,8 +78,12 @@ export default function ApplicationTable({
               const status =
                 app.isApprove === true ? "ACCEPTED" : app.isApprove === false ? "REJECTED" : "PENDING";
               return (
-                <tr key={app.studentId} className="hover:bg-neutral-50 transition-colors">
-                  <td className="px-5 py-4">
+                <tr
+                  key={app.studentId}
+                  className="hover:bg-neutral-50 transition-colors group cursor-pointer"
+                  onClick={() => onSelectApp(app)}
+                >
+                  <td className="px-5 py-4" onClick={(e) => e.stopPropagation()}>
                     <input
                       type="checkbox"
                       checked={selectedIds.has(app.studentId)}
@@ -88,7 +92,7 @@ export default function ApplicationTable({
                     />
                   </td>
                   <td className="px-5 py-4">
-                    <span className="font-bold text-neutral-900">{app.name}</span>
+                    <span className="font-bold text-neutral-900 group-hover:text-black">{app.name}</span>
                     <span className="block text-xs text-neutral-400 mt-0.5">{app.department}</span>
                   </td>
                   <td className="px-5 py-4 text-neutral-600 font-mono text-xs">{app.studentId}</td>
@@ -97,16 +101,20 @@ export default function ApplicationTable({
                     <span className="text-neutral-400 text-xs">
                       {new Date(app.createdAt).toLocaleDateString()}
                     </span>
-                    {app.classLevel && app.classLevel !== "미정" && (
+                    {app.classLevel && app.classLevel !== "미정" ? (
                       <span className="block mt-1 text-[10px] font-bold tracking-widest text-neutral-900 bg-neutral-100 px-2 py-0.5 w-fit">
                         {app.classLevel}
+                      </span>
+                    ) : (
+                      <span className="block mt-1 text-[10px] font-bold tracking-widest text-neutral-400 bg-neutral-100 border border-neutral-200 px-2 py-0.5 w-fit">
+                        미정
                       </span>
                     )}
                   </td>
                   <td className="px-5 py-4">
                     <StatusBadge isApprove={app.isApprove} />
                   </td>
-                  <td className="px-5 py-4 text-right">
+                  <td className="px-5 py-4 text-right" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center justify-end gap-1">
                       <button
                         type="button"

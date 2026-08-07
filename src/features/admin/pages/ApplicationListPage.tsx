@@ -6,6 +6,7 @@ import { applicantService, recruitmentService } from "@/services/api";
 import type { ApplicantResponseDto } from "@/services/types";
 import { AnimatePresence } from "framer-motion";
 import { Loader2 } from "lucide-react";
+import AdminSubNav from "../components/AdminSubNav";
 import ApplicationDetailModal from "../components/ApplicationDetailModal";
 import ApplicationFilter from "../components/ApplicationFilter";
 import ApplicationTable from "../components/ApplicationTable";
@@ -139,9 +140,14 @@ export default function ApplicationListPage() {
 
   const filteredApps = applications.filter((app) => {
     if (filter === "ALL") return true;
+    if (filter === "PENDING") return app.isApprove === null;
     if (filter === "ACCEPTED") return app.isApprove === true;
     if (filter === "REJECTED") return app.isApprove === false;
-    if (filter === "PENDING") return app.isApprove === null;
+    if (filter === "UNASSIGNED_CLASS") {
+      if (!app.classLevel || app.classLevel === "미정") return true;
+      const upper = app.classLevel.toUpperCase();
+      return !["SEED", "BRANCH", "TREE"].includes(upper);
+    }
     return true;
   });
 
@@ -179,6 +185,8 @@ export default function ApplicationListPage() {
             {selectedIds.size}명 일괄 합격
           </button>
         </div>
+
+        <AdminSubNav />
 
         <ApplicationFilter filter={filter} setFilter={setFilter} applications={applications} />
 
