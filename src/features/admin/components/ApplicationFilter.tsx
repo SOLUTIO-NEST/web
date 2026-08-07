@@ -31,28 +31,40 @@ export default function ApplicationFilter({ filter, setFilter, applications }: P
   };
 
   return (
-    <div className="flex items-center gap-0 mb-6 border-b border-neutral-300 overflow-x-auto">
-      {FILTERS.map((f) => (
-        <button
-          key={f.key}
-          type="button"
-          onClick={() => setFilter(f.key)}
-          className={`px-4 py-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${
-            filter === f.key
-              ? "border-black text-black"
-              : "border-transparent text-neutral-400 hover:text-neutral-600"
-          }`}
-        >
-          {f.label}
-          <span
-            className={`ml-2 text-[10px] font-bold tracking-wider ${
-              filter === f.key ? "text-black/60" : "text-neutral-300"
-            }`}
-          >
-            {getCount(f.key)}
-          </span>
-        </button>
-      ))}
+    <div className="bg-white border border-neutral-200 px-4 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm h-[58px]">
+      <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto">
+        {FILTERS.map((f) => {
+          const isActive = filter === f.key;
+          const count = getCount(f.key);
+          return (
+            <button
+              key={f.key}
+              type="button"
+              onClick={() => setFilter(f.key)}
+              className={`px-3 py-1.5 text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                isActive
+                  ? "bg-neutral-900 text-white shadow-sm"
+                  : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-black"
+              }`}
+            >
+              <span>{f.label}</span>
+              <span
+                className={`px-1.5 py-0.5 text-[10px] font-extrabold rounded ${
+                  isActive ? "bg-white/20 text-white" : "bg-neutral-200 text-neutral-600"
+                }`}
+              >
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
+        <span className="text-xs font-bold text-neutral-500">
+          총 <span className="text-black font-extrabold">{applications.length}</span>명 신청됨
+        </span>
+      </div>
     </div>
   );
 }

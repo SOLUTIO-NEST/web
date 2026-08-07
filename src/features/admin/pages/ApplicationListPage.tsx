@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { applicantService, recruitmentService } from "@/services/api";
 import type { ApplicantResponseDto } from "@/services/types";
 import { AnimatePresence } from "framer-motion";
-import { Loader2 } from "lucide-react";
+import { Loader2, Users } from "lucide-react";
 import AdminSubNav from "../components/AdminSubNav";
 import ApplicationDetailModal from "../components/ApplicationDetailModal";
 import ApplicationFilter from "../components/ApplicationFilter";
@@ -163,12 +163,13 @@ export default function ApplicationListPage() {
     <div className="min-h-screen bg-neutral-100 text-black">
       <div className="max-w-screen-xl mx-auto px-5 md:px-10 py-8 md:py-12">
         {/* 헤더 */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
             <span className="text-[10px] font-bold tracking-[0.3em] text-neutral-400 block mb-2">
               ADMIN
             </span>
-            <h1 className="text-3xl md:text-4xl font-black tracking-tighter leading-tight">
+            <h1 className="text-3xl md:text-4xl font-black tracking-tighter leading-tight flex items-center gap-3">
+              <Users className="text-neutral-900" size={36} />
               신청 관리
             </h1>
             <p className="text-sm font-medium text-neutral-500 mt-2">

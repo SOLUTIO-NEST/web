@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { blacklistService } from "@/services/api";
 import type { BlacklistResponseDto, BlacklistDetailResponseDto } from "@/services/types";
 import { AnimatePresence } from "framer-motion";
-import { Plus, Search, ShieldAlert, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, ShieldAlert, ChevronLeft, ChevronRight } from "lucide-react";
 import AdminSubNav from "../components/AdminSubNav";
 import BlacklistTable from "../components/BlacklistTable";
 import BlacklistAddModal from "../components/BlacklistAddModal";
@@ -17,7 +17,6 @@ export default function BlacklistPage() {
 
   const [blacklists, setBlacklists] = useState<BlacklistResponseDto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [totalElements, setTotalElements] = useState(0);
@@ -80,16 +79,6 @@ export default function BlacklistPage() {
     }
   };
 
-  const filteredBlacklists = blacklists.filter((item) => {
-    if (!searchQuery.trim()) return true;
-    const query = searchQuery.toLowerCase();
-    return (
-      item.studentId?.toLowerCase().includes(query) ||
-      item.name?.toLowerCase().includes(query) ||
-      item.department?.toLowerCase().includes(query)
-    );
-  });
-
   return (
     <div className="min-h-screen bg-neutral-100 text-black">
       <div className="max-w-screen-xl mx-auto px-5 md:px-10 py-8 md:py-12">
@@ -120,29 +109,16 @@ export default function BlacklistPage() {
         {/* 탭 네비게이션 */}
         <AdminSubNav />
 
-        {/* 필터 및 검색 바 */}
-        <div className="bg-white border border-neutral-200 p-4 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
-          <div className="relative w-full sm:w-80">
-            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
-            <input
-              type="text"
-              placeholder="학번, 이름, 학과로 검색..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-neutral-50 border border-neutral-200 text-xs font-semibold focus:outline-none focus:border-black focus:bg-white transition-colors"
-            />
-          </div>
-
-          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-            <span className="text-xs font-bold text-neutral-500">
-              총 <span className="text-red-600 font-extrabold">{totalElements}</span>명 등록됨
-            </span>
-          </div>
+        {/* 정보 바 */}
+        <div className="bg-white border border-neutral-200 px-4 mb-6 flex items-center justify-between shadow-sm h-[58px]">
+          <span className="text-xs font-bold text-neutral-500">
+            총 <span className="text-red-600 font-extrabold">{totalElements}</span>명 등록됨
+          </span>
         </div>
 
         {/* 리스트 테이블 */}
         <BlacklistTable
-          blacklists={filteredBlacklists}
+          blacklists={blacklists}
           loading={loading}
           onViewDetail={(item) => setSelectedDetailId(item.id)}
           onEditReason={(item) =>
