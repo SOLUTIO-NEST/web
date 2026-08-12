@@ -7,7 +7,7 @@ interface Props {
 }
 
 function isUnassignedClass(raw: string | null | undefined): boolean {
-  if (!raw || raw === "미정") return true;
+  if (!raw || raw === "미정" || raw === "미배정") return true;
   const upper = raw.toUpperCase();
   return !["SEED", "BRANCH", "TREE"].includes(upper);
 }
@@ -15,7 +15,7 @@ function isUnassignedClass(raw: string | null | undefined): boolean {
 const FILTERS = [
   { key: "ALL", label: "전체", eng: "ALL" },
   { key: "PENDING", label: "미처리", eng: "PENDING" },
-  { key: "ACCEPTED", label: "합격", eng: "ACCEPTED" },
+  { key: "APPROVED", label: "합격", eng: "APPROVED" },
   { key: "REJECTED", label: "불합격", eng: "REJECTED" },
   { key: "UNASSIGNED_CLASS", label: "반 미정", eng: "UNASSIGNED_CLASS" },
 ] as const;
@@ -23,9 +23,9 @@ const FILTERS = [
 export default function ApplicationFilter({ filter, setFilter, applications }: Props) {
   const getCount = (status: string) => {
     if (status === "ALL") return applications.length;
-    if (status === "PENDING") return applications.filter((a) => a.isApprove === null).length;
-    if (status === "ACCEPTED") return applications.filter((a) => a.isApprove === true).length;
-    if (status === "REJECTED") return applications.filter((a) => a.isApprove === false).length;
+    if (status === "PENDING") return applications.filter((a) => a.passStatus === "PENDING").length;
+    if (status === "APPROVED" || status === "ACCEPTED") return applications.filter((a) => a.passStatus === "APPROVED").length;
+    if (status === "REJECTED") return applications.filter((a) => a.passStatus === "REJECTED").length;
     if (status === "UNASSIGNED_CLASS") return applications.filter((a) => isUnassignedClass(a.classLevel)).length;
     return 0;
   };

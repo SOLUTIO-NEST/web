@@ -1,4 +1,4 @@
-import { type ApplicantResponseDto } from "@/services/types";
+import { type ApplicantResponseDto, type PassStatus } from "@/services/types";
 import { Check, X, MoreHorizontal } from "lucide-react";
 
 interface Props {
@@ -11,14 +11,14 @@ interface Props {
   onToggleStatus: (app: ApplicantResponseDto) => void;
 }
 
-function StatusBadge({ isApprove }: { isApprove: boolean | null }) {
-  if (isApprove === true)
+function StatusBadge({ passStatus }: { passStatus: PassStatus }) {
+  if (passStatus === "APPROVED")
     return (
       <span className="px-2.5 py-0.5 text-[10px] font-bold tracking-widest border border-green-400 text-green-700 bg-green-50">
         합격
       </span>
     );
-  if (isApprove === false)
+  if (passStatus === "REJECTED")
     return (
       <span className="px-2.5 py-0.5 text-[10px] font-bold tracking-widest border border-red-300 text-red-600 bg-red-50">
         불합격
@@ -75,8 +75,7 @@ export default function ApplicationTable({
           </thead>
           <tbody className="divide-y divide-neutral-100">
             {applications.map((app) => {
-              const status =
-                app.isApprove === true ? "ACCEPTED" : app.isApprove === false ? "REJECTED" : "PENDING";
+              const status = app.passStatus;
               return (
                 <tr
                   key={app.studentId}
@@ -101,18 +100,18 @@ export default function ApplicationTable({
                     <span className="text-neutral-400 text-xs">
                       {new Date(app.createdAt).toLocaleDateString()}
                     </span>
-                    {app.classLevel && app.classLevel !== "미정" ? (
+                    {app.classLevel && app.classLevel !== "미정" && app.classLevel !== "미배정" ? (
                       <span className="block mt-1 text-[10px] font-bold tracking-widest text-neutral-900 bg-neutral-100 px-2 py-0.5 w-fit">
                         {app.classLevel}
                       </span>
                     ) : (
                       <span className="block mt-1 text-[10px] font-bold tracking-widest text-neutral-400 bg-neutral-100 border border-neutral-200 px-2 py-0.5 w-fit">
-                        미정
+                        미배정
                       </span>
                     )}
                   </td>
                   <td className="px-5 py-4">
-                    <StatusBadge isApprove={app.isApprove} />
+                    <StatusBadge passStatus={app.passStatus} />
                   </td>
                   <td className="px-5 py-4 text-right" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center justify-end gap-1">
@@ -128,13 +127,13 @@ export default function ApplicationTable({
                         type="button"
                         onClick={() => onToggleStatus(app)}
                         className={`p-2 transition-colors ${
-                          status === "ACCEPTED"
+                          status === "APPROVED"
                             ? "text-green-600 hover:bg-red-50 hover:text-red-600"
                             : "text-neutral-300 hover:bg-green-50 hover:text-green-600"
                         }`}
-                        title={status === "ACCEPTED" ? "불합격 처리" : "합격 처리"}
+                        title={status === "APPROVED" ? "불합격 처리" : "합격 처리"}
                       >
-                        {status === "ACCEPTED" ? <X size={16} /> : <Check size={16} />}
+                        {status === "APPROVED" ? <X size={16} /> : <Check size={16} />}
                       </button>
                     </div>
                   </td>

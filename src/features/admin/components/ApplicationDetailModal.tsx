@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react";
-import { type ApplicantResponseDto } from "@/services/types";
+import { type ApplicantResponseDto, type PassStatus } from "@/services/types";
 import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 
 const CLASS_LEVELS = [
-  { value: "", label: "미정" },
+  { value: "", label: "미배정" },
   { value: "SEED", label: "Seed" },
   { value: "BRANCH", label: "Branch" },
   { value: "TREE", label: "Tree" },
 ] as const;
 
 function normalizeClassLevel(raw: string | null | undefined): string {
-  if (!raw || raw === "미정") return "";
+  if (!raw || raw === "미정" || raw === "미배정") return "";
   const upper = raw.toUpperCase();
   if (["SEED", "BRANCH", "TREE"].includes(upper)) return upper;
   const map: Record<string, string> = { Seed: "SEED", Branch: "BRANCH", Tree: "TREE" };
@@ -21,7 +21,7 @@ function normalizeClassLevel(raw: string | null | undefined): string {
 interface Props {
   app: ApplicantResponseDto;
   onClose: () => void;
-  onUpdateStatus: (isApprove: boolean) => void;
+  onUpdateStatus: (status: PassStatus) => void;
   onUpdateClassLevel: (classLevel: string | null) => void;
 }
 
@@ -36,17 +36,13 @@ export default function ApplicationDetailModal({
     isLoading: true,
   });
   const [selectedLevel, setSelectedLevel] = useState<string>(normalizeClassLevel(app.classLevel));
-  const [selectedStatus, setSelectedStatus] = useState<"PENDING" | "ACCEPTED" | "REJECTED">(
-    app.isApprove === true ? "ACCEPTED" : app.isApprove === false ? "REJECTED" : "PENDING"
-  );
+  const [selectedStatus, setSelectedStatus] = useState<PassStatus>(app.passStatus || "PENDING");
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    setDetail((prev) => ({ ...prev, isApprove: app.isApprove }));
-    setSelectedStatus(
-      app.isApprove === true ? "ACCEPTED" : app.isApprove === false ? "REJECTED" : "PENDING"
-    );
-  }, [app.isApprove]);
+    setDetail((prev) => ({ ...prev, passStatus: app.passStatus }));
+    setSelectedStatus(app.passStatus || "PENDING");
+  }, [app.passStatus]);
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -56,13 +52,7 @@ export default function ApplicationDetailModal({
         );
         setDetail({ ...fullData, isLoading: false });
         setSelectedLevel(normalizeClassLevel(fullData.classLevel));
-        setSelectedStatus(
-          fullData.isApprove === true
-            ? "ACCEPTED"
-            : fullData.isApprove === false
-              ? "REJECTED"
-              : "PENDING"
-        );
+        setSelectedStatus(fullData.passStatus || "PENDING");
       } catch (e) {
         console.error("Failed to fetch detail", e);
         setDetail((prev) => ({ ...prev, isLoading: false }));
@@ -82,14 +72,8 @@ export default function ApplicationDetailModal({
         await onUpdateClassLevel(normLevel);
       }
 
-      const initialStatus =
-        detail.isApprove === true ? "ACCEPTED" : detail.isApprove === false ? "REJECTED" : "PENDING";
-      if (selectedStatus !== initialStatus) {
-        if (selectedStatus === "ACCEPTED") {
-          await onUpdateStatus(true);
-        } else if (selectedStatus === "REJECTED") {
-          await onUpdateStatus(false);
-        }
+      if (selectedStatus !== detail.passStatus) {
+        await onUpdateStatus(selectedStatus);
       }
     } catch (e) {
       console.error("Failed to save changes", e);
@@ -100,11 +84,11 @@ export default function ApplicationDetailModal({
   };
 
   const statusLabel =
-    detail.isApprove === true ? "합격" : detail.isApprove === false ? "불합격" : "대기중";
+    detail.passStatus === "APPROVED" ? "합격" : detail.passStatus === "REJECTED" ? "불합격" : "대기중";
   const statusStyle =
-    detail.isApprove === true
+    detail.passStatus === "APPROVED"
       ? "border-green-400 text-green-700 bg-green-50"
-      : detail.isApprove === false
+      : detail.passStatus === "REJECTED"
         ? "border-red-300 text-red-600 bg-red-50"
         : "border-neutral-300 text-neutral-500";
 
@@ -223,12 +207,12 @@ export default function ApplicationDetailModal({
                 <select
                   value={selectedStatus}
                   onChange={(e) =>
-                    setSelectedStatus(e.target.value as "PENDING" | "ACCEPTED" | "REJECTED")
+                    setSelectedStatus(e.target.value as PassStatus)
                   }
                   className="w-full appearance-none border border-neutral-300 bg-white px-3.5 py-2 pr-8 text-xs font-bold text-neutral-900 outline-none focus:border-black transition-colors"
                 >
                   <option value="PENDING">미정 (대기중)</option>
-                  <option value="ACCEPTED">합격</option>
+                  <option value="APPROVED">합격</option>
                   <option value="REJECTED">불합격</option>
                 </select>
                 <ChevronDown

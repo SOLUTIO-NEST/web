@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 
 import { applicantService, recruitmentService } from "@/services/api";
-import type { ApplicantResponseDto } from "@/services/types";
+import type { ApplicantResponseDto, PassStatus } from "@/services/types";
 import { AnimatePresence } from "framer-motion";
 import { Loader2, Users } from "lucide-react";
 import AdminSubNav from "../components/AdminSubNav";
@@ -65,25 +65,25 @@ export default function ApplicationListPage() {
     }
   };
 
-  const toggleStatus = async (app: ApplicantResponseDto, explicitStatus?: boolean) => {
-    let targetStatus: boolean;
+  const toggleStatus = async (app: ApplicantResponseDto, explicitStatus?: PassStatus) => {
+    let targetStatus: PassStatus;
     if (explicitStatus !== undefined) {
       targetStatus = explicitStatus;
     } else {
-      if (app.isApprove === null) targetStatus = true;
-      else if (app.isApprove === true) targetStatus = false;
-      else targetStatus = true;
+      if (app.passStatus === "PENDING") targetStatus = "APPROVED";
+      else if (app.passStatus === "APPROVED") targetStatus = "REJECTED";
+      else targetStatus = "APPROVED";
     }
     try {
       setApplications((prev) =>
-        prev.map((a) => (a.studentId === app.studentId ? { ...a, isApprove: targetStatus } : a))
+        prev.map((a) => (a.studentId === app.studentId ? { ...a, passStatus: targetStatus } : a))
       );
       if (selectedApp && selectedApp.studentId === app.studentId) {
-        setSelectedApp({ ...selectedApp, isApprove: targetStatus });
+        setSelectedApp({ ...selectedApp, passStatus: targetStatus });
       }
-      if (targetStatus) {
+      if (targetStatus === "APPROVED") {
         await applicantService.approve(app.studentId);
-      } else {
+      } else if (targetStatus === "REJECTED") {
         await applicantService.reject(app.studentId);
       }
     } catch (e) {
@@ -121,9 +121,13 @@ export default function ApplicationListPage() {
       console.error(e);
       let errorMessage = "처리 중 오류가 발생했습니다.";
       if (e.response) {
-        errorMessage += `\n상태 코드: ${e.response.status}`;
-        if (e.response.data?.message) errorMessage += `\n메시지: ${e.response.data.message}`;
-        else if (e.response.data?.detail) errorMessage += `\n상세: ${e.response.data.detail}`;
+        if (e.response.status === 409) {
+          errorMessage = "승인 실패 (409 CONFLICT): '합격(APPROVED)' 상태인 지원자만 계정 생성 승인이 가능합니다.";
+        } else {
+          errorMessage += `\n상태 코드: ${e.response.status}`;
+          if (e.response.data?.message) errorMessage += `\n메시지: ${e.response.data.message}`;
+          else if (e.response.data?.detail) errorMessage += `\n상세: ${e.response.data.detail}`;
+        }
       }
       alert(errorMessage);
     } finally {
@@ -140,11 +144,11 @@ export default function ApplicationListPage() {
 
   const filteredApps = applications.filter((app) => {
     if (filter === "ALL") return true;
-    if (filter === "PENDING") return app.isApprove === null;
-    if (filter === "ACCEPTED") return app.isApprove === true;
-    if (filter === "REJECTED") return app.isApprove === false;
+    if (filter === "PENDING") return app.passStatus === "PENDING";
+    if (filter === "APPROVED" || filter === "ACCEPTED") return app.passStatus === "APPROVED";
+    if (filter === "REJECTED") return app.passStatus === "REJECTED";
     if (filter === "UNASSIGNED_CLASS") {
-      if (!app.classLevel || app.classLevel === "미정") return true;
+      if (!app.classLevel || app.classLevel === "미정" || app.classLevel === "미배정") return true;
       const upper = app.classLevel.toUpperCase();
       return !["SEED", "BRANCH", "TREE"].includes(upper);
     }

@@ -99,6 +99,8 @@ export interface ApplicantCreateRequestDto {
     applyReason: string;
 }
 
+export type PassStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+
 export interface ApplicantPassResponseDto {
     name: string;
     classLevel: string | null;
@@ -106,7 +108,7 @@ export interface ApplicantPassResponseDto {
     groupAccountNumber: string | null;
     recruitmentId: number;
     passedMessage: string | null;
-    isPassed: boolean | null;
+    passStatus: PassStatus;
 }
 
 export type ClassLevel = 'SEED' | 'BRANCH' | 'TREE';
@@ -120,7 +122,7 @@ export interface ApplicantResponseDto {
     bojId?: string; // Backend sends bojId
     mainLanguage?: MainLanguage;
     applyReason?: string; // Backend sends applyReason
-    isApprove: boolean | null;
+    passStatus: PassStatus;
     classLevel?: string | null;
     createdAt: string;
 
