@@ -40,7 +40,12 @@ export default function PageHeader() {
     { label: "대회", to: "/competition" },
     { label: "연혁", to: "/history" },
     { label: "문의", to: "/contact" },
-    ...(isAdmin ? [{ label: "신청 관리", to: "/admin/applications" }] : []),
+    ...(isAdmin
+      ? [
+          { label: "신청 관리", to: "/admin/applications" },
+          { label: "블랙리스트", to: "/admin/blacklist" },
+        ]
+      : []),
   ];
 
   return (

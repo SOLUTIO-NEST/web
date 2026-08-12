@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react";
-import { type ApplicantResponseDto } from "@/services/types";
+import { type ApplicantResponseDto, type PassStatus } from "@/services/types";
 import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 
 const CLASS_LEVELS = [
-  { value: "", label: "미정" },
+  { value: "", label: "미배정" },
   { value: "SEED", label: "Seed" },
   { value: "BRANCH", label: "Branch" },
   { value: "TREE", label: "Tree" },
 ] as const;
 
 function normalizeClassLevel(raw: string | null | undefined): string {
-  if (!raw || raw === "미정") return "";
+  if (!raw || raw === "미정" || raw === "미배정") return "";
   const upper = raw.toUpperCase();
   if (["SEED", "BRANCH", "TREE"].includes(upper)) return upper;
   const map: Record<string, string> = { Seed: "SEED", Branch: "BRANCH", Tree: "TREE" };
@@ -21,7 +21,7 @@ function normalizeClassLevel(raw: string | null | undefined): string {
 interface Props {
   app: ApplicantResponseDto;
   onClose: () => void;
-  onUpdateStatus: (isApprove: boolean) => void;
+  onUpdateStatus: (status: PassStatus) => void;
   onUpdateClassLevel: (classLevel: string | null) => void;
 }
 
@@ -36,10 +36,13 @@ export default function ApplicationDetailModal({
     isLoading: true,
   });
   const [selectedLevel, setSelectedLevel] = useState<string>(normalizeClassLevel(app.classLevel));
+  const [selectedStatus, setSelectedStatus] = useState<PassStatus>(app.passStatus || "PENDING");
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    setDetail((prev) => ({ ...prev, isApprove: app.isApprove }));
-  }, [app.isApprove]);
+    setDetail((prev) => ({ ...prev, passStatus: app.passStatus }));
+    setSelectedStatus(app.passStatus || "PENDING");
+  }, [app.passStatus]);
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -49,6 +52,7 @@ export default function ApplicationDetailModal({
         );
         setDetail({ ...fullData, isLoading: false });
         setSelectedLevel(normalizeClassLevel(fullData.classLevel));
+        setSelectedStatus(fullData.passStatus || "PENDING");
       } catch (e) {
         console.error("Failed to fetch detail", e);
         setDetail((prev) => ({ ...prev, isLoading: false }));
@@ -57,12 +61,34 @@ export default function ApplicationDetailModal({
     fetchDetail();
   }, [app.studentId]);
 
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      const normLevel = selectedLevel === "" ? null : selectedLevel;
+      const initialNormLevel =
+        normalizeClassLevel(detail.classLevel) === "" ? null : normalizeClassLevel(detail.classLevel);
+
+      if (normLevel !== initialNormLevel) {
+        await onUpdateClassLevel(normLevel);
+      }
+
+      if (selectedStatus !== detail.passStatus) {
+        await onUpdateStatus(selectedStatus);
+      }
+    } catch (e) {
+      console.error("Failed to save changes", e);
+    } finally {
+      setIsSaving(false);
+      onClose();
+    }
+  };
+
   const statusLabel =
-    detail.isApprove === true ? "합격" : detail.isApprove === false ? "불합격" : "대기중";
+    detail.passStatus === "APPROVED" ? "합격" : detail.passStatus === "REJECTED" ? "불합격" : "대기중";
   const statusStyle =
-    detail.isApprove === true
+    detail.passStatus === "APPROVED"
       ? "border-green-400 text-green-700 bg-green-50"
-      : detail.isApprove === false
+      : detail.passStatus === "REJECTED"
         ? "border-red-300 text-red-600 bg-red-50"
         : "border-neutral-300 text-neutral-500";
 
@@ -144,66 +170,80 @@ export default function ApplicationDetailModal({
           </div>
         </div>
 
-        {/* 하단 */}
-        <div className="px-5 md:px-8 py-4 border-t border-neutral-200 shrink-0 space-y-3">
-          {/* 반 배정 */}
-          <div className="flex items-center gap-2">
-            <div className="relative flex-1">
-              <select
-                value={selectedLevel}
-                onChange={(e) => setSelectedLevel(e.target.value)}
-                className="w-full appearance-none border border-neutral-300 bg-white px-3 py-2 pr-8 text-sm font-medium outline-none focus:border-black transition-colors"
-              >
-                {CLASS_LEVELS.map((l) => (
-                  <option key={l.value} value={l.value}>
-                    {l.label}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown
-                size={14}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none"
-              />
+        {/* 하단 컨트롤 및 저장 버튼 */}
+        <div className="px-5 md:px-8 py-5 border-t border-neutral-200 shrink-0 bg-neutral-50/50 space-y-4">
+          {/* 2열 레이아웃: 좌측 반 선택, 우측 합격/불합격/미정 선택 */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* 좌측: 반 선택 */}
+            <div>
+              <label className="text-[10px] font-bold tracking-[0.15em] text-neutral-400 block mb-1.5 uppercase">
+                반 배정
+              </label>
+              <div className="relative">
+                <select
+                  value={selectedLevel}
+                  onChange={(e) => setSelectedLevel(e.target.value)}
+                  className="w-full appearance-none border border-neutral-300 bg-white px-3.5 py-2 pr-8 text-xs font-bold text-neutral-900 outline-none focus:border-black transition-colors"
+                >
+                  {CLASS_LEVELS.map((l) => (
+                    <option key={l.value} value={l.value}>
+                      {l.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  size={14}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none"
+                />
+              </div>
             </div>
-            <button
-              type="button"
-              onClick={() => onUpdateClassLevel(selectedLevel === "" ? null : selectedLevel)}
-              className="px-4 py-2 border border-neutral-300 text-sm font-bold hover:bg-neutral-50 transition-colors shrink-0"
-            >
-              반 저장
-            </button>
+
+            {/* 우측: 합격 여부 선택 */}
+            <div>
+              <label className="text-[10px] font-bold tracking-[0.15em] text-neutral-400 block mb-1.5 uppercase">
+                합격 여부
+              </label>
+              <div className="relative">
+                <select
+                  value={selectedStatus}
+                  onChange={(e) =>
+                    setSelectedStatus(e.target.value as PassStatus)
+                  }
+                  className="w-full appearance-none border border-neutral-300 bg-white px-3.5 py-2 pr-8 text-xs font-bold text-neutral-900 outline-none focus:border-black transition-colors"
+                >
+                  <option value="PENDING">미정 (대기중)</option>
+                  <option value="APPROVED">합격</option>
+                  <option value="REJECTED">불합격</option>
+                </select>
+                <ChevronDown
+                  size={14}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none"
+                />
+              </div>
+            </div>
           </div>
 
-          {/* 합격/불합격 + 닫기 */}
-          <div className="flex items-center justify-between">
+          {/* 하단 버튼 */}
+          <div className="flex items-center justify-between pt-2">
             <span className="text-[10px] font-bold tracking-[0.25em] text-neutral-300">
               SOLUTIO NEST
             </span>
             <div className="flex items-center gap-2">
-              {detail.isApprove !== false && (
-                <button
-                  type="button"
-                  onClick={() => onUpdateStatus(false)}
-                  className="px-4 py-2 border border-neutral-300 text-sm font-bold text-red-600 hover:bg-red-50 hover:border-red-200 transition-colors"
-                >
-                  불합격
-                </button>
-              )}
-              {detail.isApprove !== true && (
-                <button
-                  type="button"
-                  onClick={() => onUpdateStatus(true)}
-                  className="px-4 py-2 bg-neutral-900 text-white text-sm font-bold hover:bg-neutral-800 transition-colors"
-                >
-                  합격
-                </button>
-              )}
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 border border-neutral-300 text-sm font-bold text-neutral-600 hover:bg-neutral-50 transition-colors"
+                disabled={isSaving}
+                className="px-4 py-2 border border-neutral-300 text-xs font-bold text-neutral-600 hover:bg-neutral-100 transition-colors disabled:opacity-50"
               >
                 닫기
+              </button>
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={isSaving}
+                className="px-5 py-2 bg-neutral-900 text-white text-xs font-bold hover:bg-neutral-800 transition-colors shadow-sm disabled:opacity-50"
+              >
+                {isSaving ? "저장 중..." : "저장"}
               </button>
             </div>
           </div>

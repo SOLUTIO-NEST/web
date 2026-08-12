@@ -4,6 +4,10 @@ import type {
     ApplicantCreateRequestDto,
     ApplicantPassResponseDto,
     ApplicantResponseDto,
+    BlacklistAddRequestDto,
+    BlacklistDetailResponseDto,
+    BlacklistResponseDto,
+    BlacklistUpdateReasonRequestDto,
     LoginRequestDto,
     PageResponse,
     RecruitmentCreateRequestDto,
@@ -158,6 +162,67 @@ export const applicantService = {
     individualCreateMember: async (studentId: string): Promise<string> => {
         const response = await axiosInstance.post<ApiResponse<string>>(`/applicants/${studentId}`);
         return response.data.data;
+    }
+};
+
+export const blacklistService = {
+    add: async (data: BlacklistAddRequestDto): Promise<number> => {
+        const response = await axiosInstance.post<ApiResponse<number>>('/blacklists', data);
+        return response.data.data;
+    },
+    updateReason: async (id: number, data: BlacklistUpdateReasonRequestDto): Promise<number> => {
+        const response = await axiosInstance.patch<ApiResponse<number>>(`/blacklists/${id}`, data);
+        return response.data.data;
+    },
+    delete: async (id: number): Promise<number> => {
+        const response = await axiosInstance.delete<ApiResponse<number>>(`/blacklists/${id}`);
+        return response.data.data;
+    },
+    getDetail: async (id: number): Promise<BlacklistDetailResponseDto> => {
+        const response = await axiosInstance.get<ApiResponse<BlacklistDetailResponseDto>>(`/blacklists/${id}`);
+        return response.data.data;
+    },
+    getList: async (page: number = 0, size: number = 10): Promise<PageResponse<BlacklistResponseDto>> => {
+        const response = await axiosInstance.get<ApiResponse<PageResponse<BlacklistResponseDto> | BlacklistResponseDto[]>>('/blacklists', {
+            params: { page, size }
+        });
+        const data = response.data.data;
+
+        if (!data) {
+            return {
+                content: [],
+                pageNumber: 0,
+                pageSize: size,
+                totalElements: 0,
+                totalPages: 1,
+                last: true
+            };
+        }
+
+        if (Array.isArray(data)) {
+            return {
+                content: data,
+                pageNumber: 0,
+                pageSize: data.length,
+                totalElements: data.length,
+                totalPages: 1,
+                last: true
+            };
+        }
+
+        const rawData = data as unknown as Record<string, unknown>;
+        if (Array.isArray(rawData.contents)) {
+            return {
+                content: rawData.contents as BlacklistResponseDto[],
+                pageNumber: (rawData.page as number) ?? 0,
+                pageSize: (rawData.size as number) ?? size,
+                totalElements: (rawData.totalElements as number) ?? 0,
+                totalPages: (rawData.totalPages as number) ?? 1,
+                last: rawData.hasNext === false
+            };
+        }
+
+        return data as PageResponse<BlacklistResponseDto>;
     }
 };
 
