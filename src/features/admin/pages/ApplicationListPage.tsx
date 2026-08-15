@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 
 import { applicantService, recruitmentService } from "@/services/api";
 import type { ApplicantResponseDto, PassStatus } from "@/services/types";
+import { toast } from "@/components/ui/toastStore";
+import { getErrorMessage } from "@/utils/error";
 import { AnimatePresence } from "framer-motion";
 import { Loader2, Users } from "lucide-react";
 import AdminSubNav from "../components/AdminSubNav";
@@ -30,20 +32,14 @@ export default function ApplicationListPage() {
         return;
       }
       if (user.role === "USER" || user.role === "GUEST") {
-        alert("접근 권한이 없습니다.");
+        toast.warning("접근 권한이 없습니다.");
         navigate("/", { replace: true });
         return;
       }
     }
   }, [user, isAuthLoading, navigate]);
 
-  useEffect(() => {
-    if (user && !isAuthLoading && user.role !== "USER" && user.role !== "GUEST") {
-      loadApplications();
-    }
-  }, [user, isAuthLoading]);
-
-  const loadApplications = async () => {
+  const loadApplications = useCallback(async () => {
     setLoading(true);
     try {
       let recruitmentId = currentRecruitmentId;
@@ -58,12 +54,19 @@ export default function ApplicationListPage() {
         const data = await applicantService.getList(recruitmentId, 0, 100);
         setApplications(data?.content || []);
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error("Failed to load applications:", e);
+      toast.error(getErrorMessage(e, "지원자 목록을 불러오지 못했습니다."));
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentRecruitmentId]);
+
+  useEffect(() => {
+    if (user && !isAuthLoading && user.role !== "USER" && user.role !== "GUEST") {
+      loadApplications();
+    }
+  }, [user, isAuthLoading, loadApplications]);
 
   const toggleStatus = async (app: ApplicantResponseDto, explicitStatus?: PassStatus) => {
     let targetStatus: PassStatus;
@@ -83,11 +86,14 @@ export default function ApplicationListPage() {
       }
       if (targetStatus === "APPROVED") {
         await applicantService.approve(app.studentId);
+        toast.success(`${app.name} 지원자가 합격 처리되었습니다.`);
       } else if (targetStatus === "REJECTED") {
         await applicantService.reject(app.studentId);
+        toast.info(`${app.name} 지원자가 불합격 처리되었습니다.`);
       }
     } catch (e) {
       console.error(e);
+      toast.error(getErrorMessage(e, "지원자 상태 변경에 실패했습니다."));
       loadApplications();
     }
   };
@@ -101,8 +107,10 @@ export default function ApplicationListPage() {
       if (selectedApp?.studentId === studentId) {
         setSelectedApp((prev) => (prev ? { ...prev, classLevel } : null));
       }
+      toast.success("반 배정이 변경되었습니다.");
     } catch (e) {
       console.error(e);
+      toast.error(getErrorMessage(e, "반 배정 변경에 실패했습니다."));
     }
   };
 
@@ -116,24 +124,15 @@ export default function ApplicationListPage() {
       await Promise.all(ids.map((id) => applicantService.approve(id)));
       await loadApplications();
       setSelectedIds(new Set());
-      alert("처리가 완료되었습니다.");
-    } catch (e: any) {
+      toast.success("선택한 지원자의 승인 및 계정 생성이 완료되었습니다.");
+    } catch (e: unknown) {
       console.error(e);
-      let errorMessage = "처리 중 오류가 발생했습니다.";
-      if (e.response) {
-        if (e.response.status === 409) {
-          errorMessage = "승인 실패 (409 CONFLICT): '합격(APPROVED)' 상태인 지원자만 계정 생성 승인이 가능합니다.";
-        } else {
-          errorMessage += `\n상태 코드: ${e.response.status}`;
-          if (e.response.data?.message) errorMessage += `\n메시지: ${e.response.data.message}`;
-          else if (e.response.data?.detail) errorMessage += `\n상세: ${e.response.data.detail}`;
-        }
-      }
-      alert(errorMessage);
+      toast.error(getErrorMessage(e, "일괄 처리에 실패했습니다."));
     } finally {
       setProcessing(false);
     }
   };
+
 
   const toggleSelection = (id: string) => {
     const newSet = new Set(selectedIds);

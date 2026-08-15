@@ -2,6 +2,8 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { X, ShieldAlert, Loader2 } from "lucide-react";
 import { blacklistService } from "@/services/api";
+import { toast } from "@/components/ui/toastStore";
+import { getErrorMessage } from "@/utils/error";
 
 interface Props {
   isOpen: boolean;
@@ -36,25 +38,21 @@ export default function BlacklistAddModal({ isOpen, onClose, onSuccess }: Props)
         studentId: studentId.trim(),
         reason: reason.trim(),
       });
-      alert("블랙리스트 대상자가 성공적으로 등록되었습니다.");
+      toast.success("블랙리스트 대상자가 성공적으로 등록되었습니다.");
       setStudentId("");
       setReason("");
       onSuccess();
       onClose();
     } catch (e: unknown) {
       console.error(e);
-      let msg = "등록 중 오류가 발생했습니다.";
-      if (e && typeof e === "object" && "response" in e) {
-        const res = (e as { response?: { data?: { message?: string } } }).response;
-        if (res?.data?.message) {
-          msg = res.data.message;
-        }
-      }
+      const msg = getErrorMessage(e, "등록 중 오류가 발생했습니다.");
       setErrorMessage(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

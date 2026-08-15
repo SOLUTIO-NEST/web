@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { recruitmentService } from "@/services/api";
 import type { RecruitmentResponseDto } from "@/services/types";
+import { toast } from "@/components/ui/toastStore";
+import { getErrorMessage } from "@/utils/error";
 
 interface RecruitmentInfoModalProps {
   onClose: () => void;
@@ -24,10 +26,12 @@ export default function RecruitmentInfoModal({ onClose }: RecruitmentInfoModalPr
       setRecruitments(sorted);
     } catch (e) {
       console.error("Failed to load recruitments:", e);
+      toast.error(getErrorMessage(e, "모집 일정을 불러오지 못했습니다."));
     } finally {
       setLoading(false);
     }
   };
+
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);

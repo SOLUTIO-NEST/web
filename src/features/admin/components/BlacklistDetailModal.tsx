@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { X, ShieldAlert, Edit2, Trash2, Mail, Phone, Calendar, BookOpen, type LucideIcon } from "lucide-react";
 import { blacklistService } from "@/services/api";
 import type { BlacklistDetailResponseDto } from "@/services/types";
+import { toast } from "@/components/ui/toastStore";
+import { getErrorMessage } from "@/utils/error";
 
 interface Props {
   blacklistId: number;
@@ -29,11 +31,14 @@ export default function BlacklistDetailModal({
       setDetail(data);
     } catch (e: unknown) {
       console.error(e);
-      setError("상세 정보를 불러올 수 없습니다.");
+      const msg = getErrorMessage(e, "상세 정보를 불러올 수 없습니다.");
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
   }, [blacklistId]);
+
 
   useEffect(() => {
     loadDetail();

@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { X, Edit2, Loader2 } from "lucide-react";
 import { blacklistService } from "@/services/api";
+import { toast } from "@/components/ui/toastStore";
+import { getErrorMessage } from "@/utils/error";
 
 interface Props {
   isOpen: boolean;
@@ -42,16 +44,19 @@ export default function BlacklistEditModal({
       await blacklistService.updateReason(blacklistId, {
         reason: reason.trim(),
       });
-      alert("사유가 변경되었습니다.");
+      toast.success("사유가 성공적으로 변경되었습니다.");
       onSuccess();
       onClose();
     } catch (e: unknown) {
       console.error(e);
-      setError("사유 수정 중 오류가 발생했습니다.");
+      const msg = getErrorMessage(e, "사유 수정 중 오류가 발생했습니다.");
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

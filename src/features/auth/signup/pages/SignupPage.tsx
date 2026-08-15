@@ -3,8 +3,22 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { applicantService, recruitmentService } from "@/services/api";
 import type { MainLanguage } from "@/services/types";
+import { toast } from "@/components/ui/toastStore";
+import { getErrorMessage } from "@/utils/error";
 import SignupForm from "../components/SignupForm";
 import FaqAccordion from "../components/FaqAccordion";
+
+interface SignupFormData {
+  email: string;
+  password: string;
+  name: string;
+  department: string;
+  studentId: string;
+  phone: string;
+  baekjoon: string;
+  language: string;
+  motivation?: string;
+}
 
 export default function SignupPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -15,16 +29,17 @@ export default function SignupPage() {
     return () => { document.documentElement.style.overflow = ""; };
   }, []);
 
-  const handleSubmit = async (formData: any) => {
+  const handleSubmit = async (formData: SignupFormData) => {
+
     try {
       const recruitments = await recruitmentService.getAll();
       if (!recruitments || recruitments.length === 0) {
-        alert("현재 진행 중인 모집이 없습니다.");
+        toast.warning("현재 진행 중인 모집이 없습니다.");
         return;
       }
       const lastRecruitment = recruitments[recruitments.length - 1];
       if (!lastRecruitment) {
-        alert("모집 정보를 불러오는 중 오류가 발생했습니다.");
+        toast.error("모집 정보를 불러오는 중 오류가 발생했습니다.");
         return;
       }
 
@@ -37,14 +52,17 @@ export default function SignupPage() {
         phoneNumber: formData.phone,
         bojId: formData.baekjoon,
         mainLanguage: formData.language as MainLanguage,
-        applyReason: formData.motivation,
+        applyReason: formData.motivation || "",
         recruitmentId: lastRecruitment.id,
       });
+
+      toast.success("입단 신청이 성공적으로 접수되었습니다.");
       setIsSubmitted(true);
-    } catch (err: any) {
-      alert("신청 제출 중 오류가 발생했습니다: " + (err.response?.data?.message || err.message));
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "신청 제출 중 오류가 발생했습니다."));
     }
   };
+
 
   return (
     <div className="h-[calc(100dvh-3.5rem)] overflow-hidden flex flex-col bg-neutral-100 text-black">

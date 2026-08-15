@@ -1,5 +1,6 @@
 import { useAuth } from "@/context/AuthContext";
 import Button from "@/components/ui/Button";
+import { toast } from "@/components/ui/toastStore";
 
 import { useState } from "react";
 import { AnimatePresence } from "framer-motion";
@@ -30,11 +31,12 @@ export default function Navbar() {
               key={item.label}
               href={item.href}
               className="text-[14px] font-medium text-neutral-500 hover:text-purple-600 transition-colors cursor-pointer"
-              onClick={item.href === "#" ? (e) => { e.preventDefault(); alert("아직 개발중입니다."); } : undefined}
+              onClick={item.href === "#" ? (e) => { e.preventDefault(); toast.info("아직 준비 중인 기능입니다."); } : undefined}
             >
               {item.label}
             </a>
           ))}
+
 
           {(user?.role === 'STAFF' || user?.role === 'NEST' || user?.role === 'SUPER' || user?.role === 'ADMIN') && (
             <a

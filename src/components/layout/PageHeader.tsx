@@ -3,7 +3,9 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import { applicantService } from "@/services/api";
-import type { ApplicantPassResponseDto } from "@/services/types";
+import type { ApplicantPassResponseDto, User } from "@/services/types";
+import { toast } from "@/components/ui/toastStore";
+import { getErrorMessage } from "@/utils/error";
 import ResultModal from "@/features/land/components/ResultModal";
 
 const LINK_STYLE =
@@ -30,6 +32,7 @@ export default function PageHeader() {
       setPassStatus(status);
     } catch (error) {
       console.error("Failed to fetch applicant status", error);
+      toast.error(getErrorMessage(error, "합격 여부를 조회하지 못했습니다."));
     } finally {
       setIsLoading(false);
     }
@@ -96,7 +99,7 @@ function DesktopNav({
   onCheckResult,
 }: {
   navLinks: { label: string; to: string }[];
-  user: any;
+  user: User | null;
   logout: () => void;
   onCheckResult: () => void;
 }) {
@@ -135,7 +138,7 @@ function MobileNav({
   onCheckResult,
   onToggleMenu,
 }: {
-  user: any;
+  user: User | null;
   logout: () => void;
   onCheckResult: () => void;
   onToggleMenu: () => void;
@@ -180,11 +183,12 @@ function CtaButton({
   onCheckResult,
   mobile,
 }: {
-  user: any;
+  user: User | null;
   onCheckResult: () => void;
   mobile?: boolean;
 }) {
   const px = mobile ? "px-4" : "px-5";
+
   const base = `${px} h-full flex items-center text-sm font-bold bg-black text-[#a855f7] hover:bg-black/85 transition-colors gap-2`;
 
   if (!user) {
