@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { blacklistService } from "@/services/api";
 import type { BlacklistResponseDto, BlacklistDetailResponseDto } from "@/services/types";
+import { toast } from "@/components/ui/toastStore";
+import { getErrorMessage } from "@/utils/error";
 import { AnimatePresence } from "framer-motion";
 import { Plus, ShieldAlert, ChevronLeft, ChevronRight } from "lucide-react";
 import AdminSubNav from "../components/AdminSubNav";
@@ -36,6 +38,7 @@ export default function BlacklistPage() {
       setTotalElements(data?.totalElements || (data?.content ? data.content.length : 0));
     } catch (e) {
       console.error("Failed to load blacklists:", e);
+      toast.error(getErrorMessage(e, "블랙리스트 목록을 불러오지 못했습니다."));
     } finally {
       setLoading(false);
     }
@@ -48,7 +51,7 @@ export default function BlacklistPage() {
         return;
       }
       if (user.role === "USER" || user.role === "GUEST") {
-        alert("접근 권한이 없습니다.");
+        toast.warning("접근 권한이 없습니다.");
         navigate("/", { replace: true });
         return;
       }
@@ -68,16 +71,17 @@ export default function BlacklistPage() {
     }
     try {
       await blacklistService.delete(item.id);
-      alert("블랙리스트에서 해제되었습니다.");
+      toast.success("블랙리스트에서 정상적으로 해제되었습니다.");
       if (selectedDetailId === item.id) {
         setSelectedDetailId(null);
       }
       loadBlacklists();
     } catch (e) {
       console.error("Failed to delete blacklist:", e);
-      alert("해제 처리 중 오류가 발생했습니다.");
+      toast.error(getErrorMessage(e, "블랙리스트 해제 처리 중 오류가 발생했습니다."));
     }
   };
+
 
   return (
     <div className="min-h-screen bg-neutral-100 text-black">

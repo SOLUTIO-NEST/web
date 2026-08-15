@@ -3,6 +3,8 @@ import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { toast } from "@/components/ui/toastStore";
+import { getErrorMessage } from "@/utils/error";
 
 export default function LoginPage() {
   const [studentId, setStudentId] = useState("");
@@ -19,14 +21,26 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!studentId.trim()) {
+      setError("학번을 입력해주세요.");
+      return;
+    }
+    if (!password.trim()) {
+      setError("비밀번호를 입력해주세요.");
+      return;
+    }
     setError("");
     try {
-      await login(studentId, password);
+      await login(studentId.trim(), password);
       navigate("/");
-    } catch (err: any) {
-      setError(err.toString());
+    } catch (err: unknown) {
+      const msg = getErrorMessage(err, "학번 또는 비밀번호가 올바르지 않습니다.");
+      setError(msg);
+      toast.error(msg);
     }
   };
+
+
 
   return (
     <div className="h-[calc(100dvh-3.5rem)] overflow-hidden flex flex-col bg-neutral-100 text-black">

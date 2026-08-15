@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { type ApplicantResponseDto, type PassStatus } from "@/services/types";
+import { toast } from "@/components/ui/toastStore";
+import { getErrorMessage } from "@/utils/error";
 import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 
@@ -55,6 +57,7 @@ export default function ApplicationDetailModal({
         setSelectedStatus(fullData.passStatus || "PENDING");
       } catch (e) {
         console.error("Failed to fetch detail", e);
+        toast.error(getErrorMessage(e, "상세 정보를 불러오지 못했습니다."));
         setDetail((prev) => ({ ...prev, isLoading: false }));
       }
     };
@@ -75,13 +78,16 @@ export default function ApplicationDetailModal({
       if (selectedStatus !== detail.passStatus) {
         await onUpdateStatus(selectedStatus);
       }
+      toast.success("변경사항이 성공적으로 저장되었습니다.");
+      onClose();
     } catch (e) {
       console.error("Failed to save changes", e);
+      toast.error(getErrorMessage(e, "변경사항 저장 중 오류가 발생했습니다."));
     } finally {
       setIsSaving(false);
-      onClose();
     }
   };
+
 
   const statusLabel =
     detail.passStatus === "APPROVED" ? "합격" : detail.passStatus === "REJECTED" ? "불합격" : "대기중";
