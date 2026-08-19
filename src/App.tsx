@@ -13,10 +13,13 @@ import HistoryPage from "@/features/history/pages/HistoryPage";
 import ContactPage from "@/features/contact/pages/ContactPage";
 import StudyPage from "@/features/study/pages/StudyPage";
 
-function ScrollToTop() {
+import { getTitleForPathname } from "@/hooks/useDocumentTitle";
+
+function RouteEffect() {
   const { pathname } = useLocation();
   useEffect(() => {
     window.scrollTo(0, 0);
+    document.title = getTitleForPathname(pathname);
   }, [pathname]);
   return null;
 }
@@ -26,7 +29,7 @@ export default function App() {
 
   return (
     <>
-      <ScrollToTop />
+      <RouteEffect />
       <PageHeader />
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
