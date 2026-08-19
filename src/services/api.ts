@@ -40,23 +40,12 @@ export const recruitmentService = {
         const response = await axiosInstance.post<ApiResponse<number>>('/recruitments', data);
         return response.data.data;
     },
-    getAll: async (): Promise<RecruitmentResponseDto[]> => {
-        // The doc says Response Data: RecruitmentResponseDto. 
-        // It's likely a list if it's "Retrieve Recruitment" (plural usually, but doc implies potentially single or list? 
-        // "Retrieve Recruitment" usually means list or by ID. Doc says URL /api/v1/recruitments Method GET.
-        // Usually list. Let's assume list based on typical patterns, explicitly typed as single in docs?
-        // Wait, "Response Data: RecruitmentResponseDto" suggests one? But URL is plural. 
-        // Let's assume it returns a generic wrapper with data.
-        // Actually, if it's a list, it should be List<RecruitmentResponseDto>. 
-        // I will assume it returns the data structure as is.
-        // Let's assume arrays for now if plural URL.
-        const response = await axiosInstance.get<ApiResponse<RecruitmentResponseDto[] | RecruitmentResponseDto>>('/recruitments');
-        console.log('API Response (getAll):', response.data);
+    getAll: async (page: number = 0, size: number = 50): Promise<RecruitmentResponseDto[]> => {
+        const response = await axiosInstance.get<ApiResponse<PageResponse<RecruitmentResponseDto> | RecruitmentResponseDto[] | RecruitmentResponseDto>>('/recruitments', {
+            params: { page, size }
+        });
         const data = response.data.data;
 
-        // Backend might be returning a single object (Page or just DTO) instead of Array?
-        // Or PageResponse?
-        // Let's handle non-array case by wrapping it.
         if (!data) {
             return [];
         }
@@ -65,13 +54,46 @@ export const recruitmentService = {
             return data;
         }
 
-        // If it looks like a PageResponse with 'content'
-        if ((data as any).content && Array.isArray((data as any).content)) {
-            return (data as any).content;
+        // Check for PageResponse.contents or PageResponse.content
+        const rawData = data as unknown as Record<string, unknown>;
+        if (Array.isArray(rawData.contents)) {
+            return rawData.contents as RecruitmentResponseDto[];
+        }
+        if (Array.isArray(rawData.content)) {
+            return rawData.content as RecruitmentResponseDto[];
         }
 
         // If it's a single recruitment object
         return [data as RecruitmentResponseDto];
+    },
+    getPage: async (page: number = 0, size: number = 10): Promise<PageResponse<RecruitmentResponseDto>> => {
+        const response = await axiosInstance.get<ApiResponse<PageResponse<RecruitmentResponseDto>>>('/recruitments', {
+            params: { page, size }
+        });
+        const data = response.data.data;
+        const rawData = data as unknown as Record<string, unknown>;
+        const items = (Array.isArray(rawData?.contents)
+            ? rawData.contents
+            : Array.isArray(rawData?.content)
+            ? rawData.content
+            : []) as RecruitmentResponseDto[];
+        return {
+            contents: items,
+            content: items,
+            page: (rawData?.page as number) ?? page + 1,
+            size: (rawData?.size as number) ?? size,
+            totalElements: (rawData?.totalElements as number) ?? items.length,
+            totalPages: (rawData?.totalPages as number) ?? 1,
+            hasNext: (rawData?.hasNext as boolean) ?? false,
+            hasPrevious: (rawData?.hasPrevious as boolean) ?? false,
+            pageNumber: rawData?.page ? (rawData.page as number) - 1 : page,
+            pageSize: (rawData?.size as number) ?? size,
+            last: rawData?.hasNext === false,
+        };
+    },
+    getById: async (id: number): Promise<RecruitmentResponseDto> => {
+        const response = await axiosInstance.get<ApiResponse<RecruitmentResponseDto>>(`/recruitments/${id}`);
+        return response.data.data;
     },
     update: async (id: number, data: RecruitmentUpdateRequestDto): Promise<number> => {
         const response = await axiosInstance.patch<ApiResponse<number>>(`/recruitments/${id}`, data);
@@ -79,6 +101,10 @@ export const recruitmentService = {
     },
     delete: async (id: number): Promise<number> => {
         const response = await axiosInstance.delete<ApiResponse<number>>(`/recruitments/${id}`);
+        return response.data.data;
+    },
+    purgeApplicantData: async (recruitmentId: number): Promise<number> => {
+        const response = await axiosInstance.post<ApiResponse<number>>(`/applicants/purge/${recruitmentId}`);
         return response.data.data;
     }
 };
@@ -93,51 +119,62 @@ export const applicantService = {
         return response.data.data;
     },
     getList: async (recruitmentId: number, page: number = 0, size: number = 10): Promise<PageResponse<ApplicantResponseDto>> => {
-        // Handle both PathVariable and potentially QueryParam based on what backend supports. 
         const response = await axiosInstance.get<ApiResponse<PageResponse<ApplicantResponseDto> | ApplicantResponseDto[]>>(`/applicants/${recruitmentId}`, {
             params: { page, size }
         });
         const data = response.data.data;
 
-        // Verify data exists
         if (!data) {
             return {
+                contents: [],
                 content: [],
-                pageNumber: 0,
-                pageSize: size,
+                page: 1,
+                size,
                 totalElements: 0,
                 totalPages: 1,
+                hasNext: false,
+                hasPrevious: false,
+                pageNumber: 0,
+                pageSize: size,
                 last: true
             };
         }
 
-        // If backend returns a List instead of Page
         if (Array.isArray(data)) {
             return {
+                contents: data,
                 content: data,
-                pageNumber: 0,
-                pageSize: data.length,
+                page: 1,
+                size: data.length,
                 totalElements: data.length,
                 totalPages: 1,
+                hasNext: false,
+                hasPrevious: false,
+                pageNumber: 0,
+                pageSize: data.length,
                 last: true
             };
         }
 
-        // Handle mismatch where backend returns 'contents' instead of 'content'
-        const rawData = data as any;
-        if (rawData.contents && Array.isArray(rawData.contents)) {
-            return {
-                content: rawData.contents,
-                pageNumber: rawData.page ?? 0,
-                pageSize: rawData.size ?? size,
-                totalElements: rawData.totalElements ?? 0,
-                totalPages: rawData.totalPages ?? 1,
-                last: rawData.hasNext === false // if hasNext is false, it is last
-            };
-        }
-
-        // If it returns standard PageResponse
-        return data as PageResponse<ApplicantResponseDto>;
+        const rawData = data as unknown as Record<string, unknown>;
+        const items = (Array.isArray(rawData.contents)
+            ? rawData.contents
+            : Array.isArray(rawData.content)
+            ? rawData.content
+            : []) as ApplicantResponseDto[];
+        return {
+            contents: items,
+            content: items,
+            page: (rawData.page as number) ?? 1,
+            size: (rawData.size as number) ?? size,
+            totalElements: (rawData.totalElements as number) ?? items.length,
+            totalPages: (rawData.totalPages as number) ?? 1,
+            hasNext: (rawData.hasNext as boolean) ?? false,
+            hasPrevious: (rawData.hasPrevious as boolean) ?? false,
+            pageNumber: rawData.page ? (rawData.page as number) - 1 : 0,
+            pageSize: (rawData.size as number) ?? size,
+            last: rawData.hasNext === false
+        };
     },
     getDetail: async (studentId: string): Promise<ApplicantResponseDto> => {
         const response = await axiosInstance.get<ApiResponse<ApplicantResponseDto>>(`/applicants/detail/${studentId}`);
@@ -161,6 +198,10 @@ export const applicantService = {
     },
     individualCreateMember: async (studentId: string): Promise<string> => {
         const response = await axiosInstance.post<ApiResponse<string>>(`/applicants/${studentId}`);
+        return response.data.data;
+    },
+    purgeData: async (recruitmentId: number): Promise<number> => {
+        const response = await axiosInstance.post<ApiResponse<number>>(`/applicants/purge/${recruitmentId}`);
         return response.data.data;
     }
 };
@@ -190,39 +231,55 @@ export const blacklistService = {
 
         if (!data) {
             return {
+                contents: [],
                 content: [],
-                pageNumber: 0,
-                pageSize: size,
+                page: 1,
+                size,
                 totalElements: 0,
                 totalPages: 1,
+                hasNext: false,
+                hasPrevious: false,
+                pageNumber: 0,
+                pageSize: size,
                 last: true
             };
         }
 
         if (Array.isArray(data)) {
             return {
+                contents: data,
                 content: data,
-                pageNumber: 0,
-                pageSize: data.length,
+                page: 1,
+                size: data.length,
                 totalElements: data.length,
                 totalPages: 1,
+                hasNext: false,
+                hasPrevious: false,
+                pageNumber: 0,
+                pageSize: data.length,
                 last: true
             };
         }
 
         const rawData = data as unknown as Record<string, unknown>;
-        if (Array.isArray(rawData.contents)) {
-            return {
-                content: rawData.contents as BlacklistResponseDto[],
-                pageNumber: (rawData.page as number) ?? 0,
-                pageSize: (rawData.size as number) ?? size,
-                totalElements: (rawData.totalElements as number) ?? 0,
-                totalPages: (rawData.totalPages as number) ?? 1,
-                last: rawData.hasNext === false
-            };
-        }
-
-        return data as PageResponse<BlacklistResponseDto>;
+        const items = (Array.isArray(rawData.contents)
+            ? rawData.contents
+            : Array.isArray(rawData.content)
+            ? rawData.content
+            : []) as BlacklistResponseDto[];
+        return {
+            contents: items,
+            content: items,
+            page: (rawData.page as number) ?? 1,
+            size: (rawData.size as number) ?? size,
+            totalElements: (rawData.totalElements as number) ?? items.length,
+            totalPages: (rawData.totalPages as number) ?? 1,
+            hasNext: (rawData.hasNext as boolean) ?? false,
+            hasPrevious: (rawData.hasPrevious as boolean) ?? false,
+            pageNumber: rawData.page ? (rawData.page as number) - 1 : 0,
+            pageSize: (rawData.size as number) ?? size,
+            last: rawData.hasNext === false
+        };
     }
 };
 

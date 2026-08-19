@@ -47,6 +47,7 @@ export default function PageHeader() {
       ? [
           { label: "신청 관리", to: "/admin/applications" },
           { label: "블랙리스트", to: "/admin/blacklist" },
+          { label: "모집 공고", to: "/admin/recruitments" },
         ]
       : []),
   ];

@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Users, ShieldAlert } from "lucide-react";
+import { Users, ShieldAlert, CalendarDays } from "lucide-react";
 
 export default function AdminSubNav() {
   const { pathname } = useLocation();
@@ -14,6 +14,11 @@ export default function AdminSubNav() {
       label: "블랙리스트 관리",
       to: "/admin/blacklist",
       icon: ShieldAlert,
+    },
+    {
+      label: "모집 공고 관리",
+      to: "/admin/recruitments",
+      icon: CalendarDays,
     },
   ];
 

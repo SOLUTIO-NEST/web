@@ -7,6 +7,7 @@ import SignupPage from "@/features/auth/signup/pages/SignupPage";
 import LoginPage from "@/features/auth/login/pages/LoginPage";
 import ApplicationListPage from "@/features/admin/pages/ApplicationListPage";
 import BlacklistPage from "@/features/admin/pages/BlacklistPage";
+import RecruitmentPage from "@/features/admin/pages/RecruitmentPage";
 import CompetitionPage from "@/features/competition/pages/CompetitionPage";
 import HistoryPage from "@/features/history/pages/HistoryPage";
 import ContactPage from "@/features/contact/pages/ContactPage";
@@ -141,6 +142,10 @@ export default function App() {
           <Route
             path="/admin/blacklist"
             element={<BlacklistPage />}
+          />
+          <Route
+            path="/admin/recruitments"
+            element={<RecruitmentPage />}
           />
         </Routes>
       </AnimatePresence>

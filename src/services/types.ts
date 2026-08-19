@@ -31,19 +31,38 @@ export interface TokenResponse {
 }
 
 // Recruitment
+export type RecruitmentStatus = 'UPCOMING' | 'OPEN' | 'CLOSED';
+
+export const RecruitmentStatus = {
+    UPCOMING: 'UPCOMING',
+    OPEN: 'OPEN',
+    CLOSED: 'CLOSED',
+} as const;
+
 export interface RecruitmentCreateRequestDto {
     title: string;
-    startDateTime: string; // ISO 8601
-    endDateTime: string;   // ISO 8601
+    startDateTime: string; // ISO 8601 / LocalDateTime (YYYY-MM-DDTHH:mm:ss)
+    endDateTime: string;   // ISO 8601 / LocalDateTime (YYYY-MM-DDTHH:mm:ss)
+    announcementDateTime?: string | null; // 최종 발표일
 }
 
-export type RecruitmentUpdateRequestDto = RecruitmentCreateRequestDto;
+export interface RecruitmentUpdateRequestDto {
+    title?: string;
+    startDateTime?: string;
+    endDateTime?: string;
+    announcementDateTime?: string | null;
+    status?: RecruitmentStatus;
+    passedMessage?: string | null; // 합격 안내 메시지 (최대 1024자)
+}
 
 export interface RecruitmentResponseDto {
     id: number;
     title: string;
     startDateTime: string;
     endDateTime: string;
+    announcementDateTime?: string | null;
+    status: RecruitmentStatus;
+    isApplicantDataPurged: boolean;
 }
 
 // Blacklist
@@ -134,10 +153,17 @@ export interface ApplicantResponseDto {
 }
 
 export interface PageResponse<T> {
-    content: T[];
-    pageNumber: number;
-    pageSize: number;
+    contents: T[];
+    page: number;
+    size: number;
     totalElements: number;
     totalPages: number;
-    last: boolean;
+    hasNext: boolean;
+    hasPrevious: boolean;
+
+    // Backward compatibility aliases
+    content?: T[];
+    pageNumber?: number;
+    pageSize?: number;
+    last?: boolean;
 }
