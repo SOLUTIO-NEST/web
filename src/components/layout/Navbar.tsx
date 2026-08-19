@@ -43,7 +43,7 @@ export default function Navbar() {
               href="/admin/applications"
               className="text-[14px] font-medium text-neutral-500 hover:text-purple-600 transition-colors"
             >
-              신청 관리
+              관리
             </a>
           )}
         </nav>

@@ -3,8 +3,20 @@ import { Eye, EyeOff } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import PrivacyPolicyModal from "./PrivacyPolicyModal";
 
+export interface SignupFormData {
+  email: string;
+  password: string;
+  name: string;
+  department: string;
+  studentId: string;
+  phone: string;
+  baekjoon: string;
+  language: string;
+  motivation?: string;
+}
+
 interface SignupFormProps {
-  onSubmit: (formData: any) => void;
+  onSubmit: (formData: SignupFormData) => void;
 }
 
 const STEPS = [
@@ -46,7 +58,7 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
         else if (!/^[^\s@]+@(kyonggi\.ac\.kr|kgu\.ac\.kr)$/.test(value)) error = "학교 이메일(kyonggi.ac.kr 또는 kgu.ac.kr)만 사용 가능합니다.";
         break;
       case "password":
-        if (value.length < 8 || value.length > 12 || !/[a-zA-Z]/.test(value) || !/[0-9]/.test(value) || !/[!@#$%^&*(),.?\":{}|<>]/.test(value))
+        if (value.length < 8 || value.length > 12 || !/[a-zA-Z]/.test(value) || !/[0-9]/.test(value) || !/[!@#$%^&*(),.?":{}|<>]/.test(value))
           error = "8~12자, 영문·숫자·특수문자를 모두 포함해야 합니다.";
         break;
       case "phone":
