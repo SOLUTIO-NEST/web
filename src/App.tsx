@@ -7,15 +7,19 @@ import SignupPage from "@/features/auth/signup/pages/SignupPage";
 import LoginPage from "@/features/auth/login/pages/LoginPage";
 import ApplicationListPage from "@/features/admin/pages/ApplicationListPage";
 import BlacklistPage from "@/features/admin/pages/BlacklistPage";
+import RecruitmentPage from "@/features/admin/pages/RecruitmentPage";
 import CompetitionPage from "@/features/competition/pages/CompetitionPage";
 import HistoryPage from "@/features/history/pages/HistoryPage";
 import ContactPage from "@/features/contact/pages/ContactPage";
 import StudyPage from "@/features/study/pages/StudyPage";
 
-function ScrollToTop() {
+import { getTitleForPathname } from "@/hooks/useDocumentTitle";
+
+function RouteEffect() {
   const { pathname } = useLocation();
   useEffect(() => {
     window.scrollTo(0, 0);
+    document.title = getTitleForPathname(pathname);
   }, [pathname]);
   return null;
 }
@@ -25,7 +29,7 @@ export default function App() {
 
   return (
     <>
-      <ScrollToTop />
+      <RouteEffect />
       <PageHeader />
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
@@ -141,6 +145,10 @@ export default function App() {
           <Route
             path="/admin/blacklist"
             element={<BlacklistPage />}
+          />
+          <Route
+            path="/admin/recruitments"
+            element={<RecruitmentPage />}
           />
         </Routes>
       </AnimatePresence>

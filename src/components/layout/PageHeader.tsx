@@ -45,8 +45,7 @@ export default function PageHeader() {
     { label: "문의", to: "/contact" },
     ...(isAdmin
       ? [
-          { label: "신청 관리", to: "/admin/applications" },
-          { label: "블랙리스트", to: "/admin/blacklist" },
+          { label: "관리", to: "/admin/applications" },
         ]
       : []),
   ];

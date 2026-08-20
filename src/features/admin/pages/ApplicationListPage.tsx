@@ -1,28 +1,34 @@
 import { useEffect, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 
 import { applicantService, recruitmentService } from "@/services/api";
-import type { ApplicantResponseDto, PassStatus } from "@/services/types";
+import type { ApplicantResponseDto, PassStatus, RecruitmentResponseDto } from "@/services/types";
 import { toast } from "@/components/ui/toastStore";
 import { getErrorMessage } from "@/utils/error";
 import { AnimatePresence } from "framer-motion";
-import { Loader2, Users } from "lucide-react";
+import { Loader2, Users, CalendarDays, ShieldCheck } from "lucide-react";
 import AdminSubNav from "../components/AdminSubNav";
 import ApplicationDetailModal from "../components/ApplicationDetailModal";
 import ApplicationFilter from "../components/ApplicationFilter";
 import ApplicationTable from "../components/ApplicationTable";
+import { getRecruitmentStatus } from "../utils/recruitment";
 
 export default function ApplicationListPage() {
   const { user, isLoading: isAuthLoading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
+  const [recruitments, setRecruitments] = useState<RecruitmentResponseDto[]>([]);
   const [applications, setApplications] = useState<ApplicantResponseDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedApp, setSelectedApp] = useState<ApplicantResponseDto | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState("ALL");
-  const [currentRecruitmentId, setCurrentRecruitmentId] = useState<number | null>(null);
+  const [currentRecruitmentId, setCurrentRecruitmentId] = useState<number | null>(() => {
+    const q = searchParams.get("recruitmentId");
+    return q ? Number(q) : null;
+  });
   const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
@@ -39,21 +45,41 @@ export default function ApplicationListPage() {
     }
   }, [user, isAuthLoading, navigate]);
 
+  // Load recruitment list initially
+  useEffect(() => {
+    const initRecruitments = async () => {
+      try {
+        const list = await recruitmentService.getAll(0, 100);
+        // Sort newest first
+        const sorted = [...list].sort((a, b) => {
+          const timeA = new Date(a.startDateTime).getTime() || 0;
+          const timeB = new Date(b.startDateTime).getTime() || 0;
+          return timeB - timeA || b.id - a.id;
+        });
+        setRecruitments(sorted);
+        const queryId = searchParams.get("recruitmentId");
+        if (queryId) {
+          setCurrentRecruitmentId(Number(queryId));
+        } else if (sorted.length > 0 && currentRecruitmentId === null) {
+          // Default to latest recruitment
+          setCurrentRecruitmentId(sorted[0].id);
+        }
+      } catch (e) {
+        console.error("Failed to load recruitments:", e);
+      }
+    };
+    if (user && !isAuthLoading && user.role !== "USER" && user.role !== "GUEST") {
+      initRecruitments();
+    }
+  }, [user, isAuthLoading, currentRecruitmentId, searchParams]);
+
   const loadApplications = useCallback(async () => {
+    if (!currentRecruitmentId) return;
     setLoading(true);
     try {
-      let recruitmentId = currentRecruitmentId;
-      if (!recruitmentId) {
-        const recruitments = await recruitmentService.getAll();
-        if (recruitments.length > 0) {
-          recruitmentId = recruitments[recruitments.length - 1].id;
-          setCurrentRecruitmentId(recruitmentId);
-        }
-      }
-      if (recruitmentId) {
-        const data = await applicantService.getList(recruitmentId, 0, 100);
-        setApplications(data?.content || []);
-      }
+      const data = await applicantService.getList(currentRecruitmentId, 0, 100);
+      const items = data?.contents || data?.content || [];
+      setApplications(items);
     } catch (e: unknown) {
       console.error("Failed to load applications:", e);
       toast.error(getErrorMessage(e, "지원자 목록을 불러오지 못했습니다."));
@@ -67,6 +93,8 @@ export default function ApplicationListPage() {
       loadApplications();
     }
   }, [user, isAuthLoading, loadApplications]);
+
+  const currentRecruitment = recruitments.find((r) => r.id === currentRecruitmentId);
 
   const toggleStatus = async (app: ApplicantResponseDto, explicitStatus?: PassStatus) => {
     let targetStatus: PassStatus;
@@ -133,7 +161,6 @@ export default function ApplicationListPage() {
     }
   };
 
-
   const toggleSelection = (id: string) => {
     const newSet = new Set(selectedIds);
     if (newSet.has(id)) newSet.delete(id);
@@ -191,6 +218,51 @@ export default function ApplicationListPage() {
         </div>
 
         <AdminSubNav />
+
+        {/* 모집 공고 선택 바 */}
+        {recruitments.length > 0 && (
+          <div className="bg-white border border-neutral-200 px-4 py-3 mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
+            <div className="flex items-center gap-2">
+              <CalendarDays size={18} className="text-purple-600" />
+              <span className="text-xs font-extrabold text-neutral-700 uppercase tracking-wider">
+                선택된 모집 공고
+              </span>
+            </div>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <select
+                value={currentRecruitmentId ?? ""}
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  setCurrentRecruitmentId(val);
+                  setSearchParams({ recruitmentId: String(val) });
+                }}
+                className="w-full sm:w-80 px-3 py-1.5 bg-neutral-50 border border-neutral-300 text-xs font-bold text-neutral-900 focus:outline-none focus:border-black transition-colors"
+              >
+                {recruitments.map((r) => {
+                  const s = getRecruitmentStatus(r.startDateTime, r.endDateTime, r.status);
+                  return (
+                    <option key={r.id} value={r.id}>
+                      #{r.id} - {r.title} [{s.label}] {r.isApplicantDataPurged ? "(파기됨)" : ""}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+          </div>
+        )}
+
+        {/* 파기 완료 알림 배너 */}
+        {currentRecruitment?.isApplicantDataPurged && (
+          <div className="mb-4 p-4 bg-neutral-900 text-white border border-neutral-800 flex items-center gap-3">
+            <ShieldCheck size={20} className="text-emerald-400 shrink-0" />
+            <div className="text-xs">
+              <span className="font-bold block">개인정보 파기 완료 공고</span>
+              <span className="text-neutral-300">
+                선택된 #{currentRecruitment.id} 공고의 지원자 개인정보는 개인정보 보호 정책에 따라 이미 파기되었습니다.
+              </span>
+            </div>
+          </div>
+        )}
 
         <ApplicationFilter filter={filter} setFilter={setFilter} applications={applications} />
 

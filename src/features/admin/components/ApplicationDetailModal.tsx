@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { type ApplicantResponseDto, type PassStatus } from "@/services/types";
+import { applicantService } from "@/services/api";
 import { toast } from "@/components/ui/toastStore";
 import { getErrorMessage } from "@/utils/error";
 import { motion } from "framer-motion";
@@ -49,9 +50,7 @@ export default function ApplicationDetailModal({
   useEffect(() => {
     const fetchDetail = async () => {
       try {
-        const fullData = await import("@/services/api").then((m) =>
-          m.applicantService.getDetail(app.studentId)
-        );
+        const fullData = await applicantService.getDetail(app.studentId);
         setDetail({ ...fullData, isLoading: false });
         setSelectedLevel(normalizeClassLevel(fullData.classLevel));
         setSelectedStatus(fullData.passStatus || "PENDING");

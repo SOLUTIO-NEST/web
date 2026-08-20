@@ -1,7 +1,13 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { authService } from '@/services/api';
-import type { User } from '@/services/types';
-import { jwtDecode } from 'jwt-decode';
+import type { User, UserRole } from '@/services/types';
+import { jwtDecode, type JwtPayload } from 'jwt-decode';
+
+interface DecodedToken extends JwtPayload {
+    auth?: string;
+    role?: UserRole;
+    name?: string;
+}
 
 interface AuthContextType {
     user: User | null;
@@ -21,25 +27,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const token = localStorage.getItem('accessToken');
         if (token) {
             try {
-                const decoded = jwtDecode<any>(token);
-                // Check if expired? jwtDecode doesn't check exp automatically against current time, 
-                // but usually interceptor handles valid expiry. 
-                // We can check if exp is in past.
-                if (decoded.exp * 1000 > Date.now()) {
+                const decoded = jwtDecode<DecodedToken>(token);
+                if (decoded.exp && decoded.exp * 1000 > Date.now()) {
                     const userData: User = {
-                        ...decoded,
+                        sub: decoded.sub || '',
+                        auth: decoded.auth || '',
+                        exp: decoded.exp,
                         id: decoded.sub,
-                        role: decoded.role || decoded.auth,
+                        role: (decoded.role || decoded.auth) as UserRole,
                         name: decoded.name || decoded.sub || '사용자',
                     };
                     setUser(userData);
                 } else {
-                    // Token expired, try reissue or logout?
-                    // Interceptor handles reissue on request. 
-                    // But here we are just setting initial state.
-                    // If expired, maybe we should't set user, or try a dummy request?
-                    // For now, if expired, we'll try to rely on interceptor logic if a request is made.
-                    // Or let's just clear if obviously expired.
                     localStorage.removeItem('accessToken');
                     localStorage.removeItem('refreshToken');
                 }
@@ -56,16 +55,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsLoading(true);
         try {
             const tokens = await authService.login({ id, password });
-            // Decode token to get user info
-            const decoded = jwtDecode<any>(tokens.accessToken);
+            const decoded = jwtDecode<DecodedToken>(tokens.accessToken);
             const userData: User = {
-                ...decoded,
-                id: decoded.sub, // Map sub to id
-                role: decoded.role || decoded.auth, // Map role (priority) or auth to role
-                name: decoded.name || decoded.sub || '사용자', // Fallback to sub or default
-                // If name is in token? If not, we might miss it. 
-                // Assuming token has name or subject is name? 
-                // Usually sub is ID. name might be 'name' claim.
+                sub: decoded.sub || '',
+                auth: decoded.auth || '',
+                exp: decoded.exp || 0,
+                id: decoded.sub,
+                role: (decoded.role || decoded.auth) as UserRole,
+                name: decoded.name || decoded.sub || '사용자',
             };
             setUser(userData);
         } catch (error) {
@@ -88,6 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
     const context = useContext(AuthContext);
     if (context === undefined) {

@@ -2,13 +2,8 @@ import { useAuth } from "@/context/AuthContext";
 import Button from "@/components/ui/Button";
 import { toast } from "@/components/ui/toastStore";
 
-import { useState } from "react";
-import { AnimatePresence } from "framer-motion";
-import RecruitmentInfoModal from "@/features/land/components/RecruitmentInfoModal";
-
 export default function Navbar() {
   const { user, logout } = useAuth();
-  const [showRecruitmentModal, setShowRecruitmentModal] = useState(false);
   return (
     <header className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-6xl">
       <div className="flex h-14 items-center justify-between px-5 rounded-2xl bg-white/40 backdrop-blur-xl border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.08)]">
@@ -43,7 +38,7 @@ export default function Navbar() {
               href="/admin/applications"
               className="text-[14px] font-medium text-neutral-500 hover:text-purple-600 transition-colors"
             >
-              신청 관리
+              관리
             </a>
           )}
         </nav>
@@ -57,21 +52,16 @@ export default function Navbar() {
               <Button variant="brandSoft" size="sm">로그인</Button>
             </a>
           )}
-          <Button
-            variant="brand"
-            size="sm"
-            onClick={() => setShowRecruitmentModal(true)}
-          >
-            모집일정
-          </Button>
+          <a href="/signup">
+            <Button
+              variant="brand"
+              size="sm"
+            >
+              합류하기
+            </Button>
+          </a>
         </div>
       </div>
-
-      <AnimatePresence>
-        {showRecruitmentModal && (
-          <RecruitmentInfoModal onClose={() => setShowRecruitmentModal(false)} />
-        )}
-      </AnimatePresence>
     </header>
   );
 }
