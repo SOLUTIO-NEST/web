@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { applicantService, recruitmentService } from "@/services/api";
 import type { MainLanguage, RecruitmentResponseDto } from "@/services/types";
 import { toast } from "@/components/ui/toastStore";
 import { getErrorMessage } from "@/utils/error";
-import { isRecruitmentOpen } from "@/features/admin/utils/recruitment";
 import SignupForm from "../components/SignupForm";
 import FaqAccordion from "../components/FaqAccordion";
-import { CalendarCheck, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 
 interface SignupFormData {
   email: string;
@@ -23,8 +22,12 @@ interface SignupFormData {
 }
 
 export default function SignupPage() {
+  const [searchParams] = useSearchParams();
+  const recruitmentIdParam = searchParams.get("recruitmentId");
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [recruitments, setRecruitments] = useState<RecruitmentResponseDto[]>([]);
   const [activeRecruitment, setActiveRecruitment] = useState<RecruitmentResponseDto | null>(null);
+  const [hasRecruitmentStep, setHasRecruitmentStep] = useState(false);
   const [loadingRecruitment, setLoadingRecruitment] = useState(true);
   const navigate = useNavigate();
 
@@ -39,17 +42,28 @@ export default function SignupPage() {
     const fetchActiveRecruitment = async () => {
       try {
         const list = await recruitmentService.getAll(0, 50);
-        // Find currently open recruitment
-        const openRecruitment = list.find((r) => isRecruitmentOpen(r));
-        if (openRecruitment) {
-          setActiveRecruitment(openRecruitment);
-        } else if (list.length > 0) {
-          // If no explicitly open, find the newest one
-          const newest = [...list].sort(
-            (a, b) =>
-              new Date(b.startDateTime).getTime() - new Date(a.startDateTime).getTime()
-          )[0];
-          setActiveRecruitment(newest);
+        // enum 상태값이 'OPEN'인 모집 공고만 필터링
+        const openRecruitments = list.filter((r) => r.status === "OPEN");
+        setRecruitments(openRecruitments);
+
+        if (recruitmentIdParam) {
+          const targeted = openRecruitments.find((r) => String(r.id) === recruitmentIdParam);
+          if (targeted) {
+            setActiveRecruitment(targeted);
+            setHasRecruitmentStep(false); // 특정 공고를 선택하고 들어왔으므로 3단계(01/03)로 시작
+            return;
+          }
+        }
+
+        if (openRecruitments.length === 1) {
+          setActiveRecruitment(openRecruitments[0]);
+          setHasRecruitmentStep(false); // 모집 중인 공고가 1개뿐이면 3단계(01/03)로 시작
+        } else if (openRecruitments.length > 1) {
+          setActiveRecruitment(openRecruitments[0]);
+          setHasRecruitmentStep(true); // 모집 중인 공고가 여러 개면 4단계(01/04)로 시작
+        } else {
+          setActiveRecruitment(null);
+          setHasRecruitmentStep(false);
         }
       } catch (err) {
         console.error("Failed to load recruitments for signup", err);
@@ -59,24 +73,12 @@ export default function SignupPage() {
     };
 
     fetchActiveRecruitment();
-  }, []);
+  }, [recruitmentIdParam]);
 
   const handleSubmit = async (formData: SignupFormData) => {
     try {
-      let targetRecruitment = activeRecruitment;
-
-      if (!targetRecruitment) {
-        const recruitments = await recruitmentService.getAll();
-        if (!recruitments || recruitments.length === 0) {
-          toast.warning("현재 진행 중인 모집 공고가 없습니다.");
-          return;
-        }
-        targetRecruitment =
-          recruitments.find((r) => isRecruitmentOpen(r)) || recruitments[0];
-      }
-
-      if (!targetRecruitment) {
-        toast.error("모집 정보를 불러오는 중 오류가 발생했습니다.");
+      if (!activeRecruitment || activeRecruitment.status !== "OPEN") {
+        toast.warning("현재 모집 진행 중인 공고가 없습니다.");
         return;
       }
 
@@ -90,7 +92,7 @@ export default function SignupPage() {
         bojId: formData.baekjoon,
         mainLanguage: formData.language as MainLanguage,
         applyReason: formData.motivation || "",
-        recruitmentId: targetRecruitment.id,
+        recruitmentId: activeRecruitment.id,
       });
 
       toast.success("입단 신청이 성공적으로 접수되었습니다.");
@@ -119,18 +121,10 @@ export default function SignupPage() {
                   입단 신청
                 </h1>
 
-                {/* 현재 모집 공고 표시 배너 */}
-                {!loadingRecruitment && activeRecruitment && (
-                  <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 bg-black/5 border border-black/10 text-xs font-bold text-neutral-800">
-                    <CalendarCheck size={14} className="text-purple-600 shrink-0" />
-                    <span>{activeRecruitment.title}</span>
-                  </div>
-                )}
-
-                {!loadingRecruitment && !activeRecruitment && (
-                  <div className="mt-4 p-3 bg-amber-50 border border-amber-200 text-xs font-semibold text-amber-800 flex items-center gap-2">
+                {!loadingRecruitment && recruitments.length === 0 && (
+                  <div className="mt-6 p-3 bg-amber-50 border border-amber-200 text-xs font-semibold text-amber-800 flex items-center gap-2">
                     <AlertCircle size={14} className="shrink-0" />
-                    <span>현재 등록된 모집 공고가 없습니다.</span>
+                    <span>현재 모집 진행 중인 공고가 없습니다.</span>
                   </div>
                 )}
               </div>
@@ -146,7 +140,13 @@ export default function SignupPage() {
 
             {/* 우측: 폼 영역 — 수직 중앙 */}
             <div className="flex-1 flex flex-col justify-center overflow-y-auto">
-              <SignupForm onSubmit={handleSubmit} />
+              <SignupForm
+                recruitments={recruitments}
+                selectedRecruitment={activeRecruitment}
+                onSelectRecruitment={setActiveRecruitment}
+                onSubmit={handleSubmit}
+                hasRecruitmentStep={hasRecruitmentStep}
+              />
             </div>
           </motion.div>
         ) : (

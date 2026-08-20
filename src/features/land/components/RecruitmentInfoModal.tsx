@@ -137,7 +137,7 @@ export default function RecruitmentInfoModal({ onClose }: RecruitmentInfoModalPr
                   <div className="shrink-0 pt-1 sm:pt-0">
                     {status.type === "OPEN" ? (
                       <Link
-                        to="/signup"
+                        to={`/signup?recruitmentId=${recruitment.id}`}
                         onClick={onClose}
                         className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-black text-white font-bold text-xs hover:bg-black/85 transition-colors w-24 sm:w-28 text-center"
                       >
