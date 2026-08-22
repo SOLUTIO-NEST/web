@@ -31,19 +31,67 @@ export interface TokenResponse {
 }
 
 // Recruitment
+export type RecruitmentStatus = 'UPCOMING' | 'OPEN' | 'CLOSED';
+
+export const RecruitmentStatus = {
+    UPCOMING: 'UPCOMING',
+    OPEN: 'OPEN',
+    CLOSED: 'CLOSED',
+} as const;
+
 export interface RecruitmentCreateRequestDto {
     title: string;
-    startDateTime: string; // ISO 8601
-    endDateTime: string;   // ISO 8601
+    startDateTime: string; // ISO 8601 / LocalDateTime (YYYY-MM-DDTHH:mm:ss)
+    endDateTime: string;   // ISO 8601 / LocalDateTime (YYYY-MM-DDTHH:mm:ss)
+    announcementDateTime?: string | null; // 최종 발표일
 }
 
-export interface RecruitmentUpdateRequestDto extends RecruitmentCreateRequestDto { }
+export interface RecruitmentUpdateRequestDto {
+    title?: string;
+    startDateTime?: string;
+    endDateTime?: string;
+    announcementDateTime?: string | null;
+    status?: RecruitmentStatus;
+    passedMessage?: string | null; // 합격 안내 메시지 (최대 1024자)
+}
 
 export interface RecruitmentResponseDto {
     id: number;
     title: string;
     startDateTime: string;
     endDateTime: string;
+    announcementDateTime?: string | null;
+    status: RecruitmentStatus;
+    isApplicantDataPurged: boolean;
+}
+
+// Blacklist
+export interface BlacklistAddRequestDto {
+    studentId: string;
+    reason: string;
+}
+
+export interface BlacklistUpdateReasonRequestDto {
+    reason: string;
+}
+
+export interface BlacklistResponseDto {
+    id: number;
+    studentId: string;
+    name: string;
+    department: string;
+    createdAt: string;
+}
+
+export interface BlacklistDetailResponseDto {
+    id: number;
+    studentId: string;
+    name: string;
+    email: string;
+    department: string;
+    phoneNumber: string;
+    reason: string;
+    createdAt: string;
 }
 
 // Applicants
@@ -70,6 +118,8 @@ export interface ApplicantCreateRequestDto {
     applyReason: string;
 }
 
+export type PassStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+
 export interface ApplicantPassResponseDto {
     name: string;
     classLevel: string | null;
@@ -77,7 +127,7 @@ export interface ApplicantPassResponseDto {
     groupAccountNumber: string | null;
     recruitmentId: number;
     passedMessage: string | null;
-    isPassed: boolean | null;
+    passStatus: PassStatus;
 }
 
 export type ClassLevel = 'SEED' | 'BRANCH' | 'TREE';
@@ -91,7 +141,7 @@ export interface ApplicantResponseDto {
     bojId?: string; // Backend sends bojId
     mainLanguage?: MainLanguage;
     applyReason?: string; // Backend sends applyReason
-    isApprove: boolean | null;
+    passStatus: PassStatus;
     classLevel?: string | null;
     createdAt: string;
 
@@ -103,10 +153,17 @@ export interface ApplicantResponseDto {
 }
 
 export interface PageResponse<T> {
-    content: T[];
-    pageNumber: number;
-    pageSize: number;
+    contents: T[];
+    page: number;
+    size: number;
     totalElements: number;
     totalPages: number;
-    last: boolean;
+    hasNext: boolean;
+    hasPrevious: boolean;
+
+    // Backward compatibility aliases
+    content?: T[];
+    pageNumber?: number;
+    pageSize?: number;
+    last?: boolean;
 }

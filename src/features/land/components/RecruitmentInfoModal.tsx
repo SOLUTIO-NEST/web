@@ -1,144 +1,179 @@
 import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { X, Calendar, AlertCircle } from "lucide-react";
 import { recruitmentService } from "@/services/api";
 import type { RecruitmentResponseDto } from "@/services/types";
-import Button from "@/components/ui/Button";
+import { toast } from "@/components/ui/toastStore";
+import { getErrorMessage } from "@/utils/error";
+import {
+  getRecruitmentStatus,
+  formatDateTimeDisplay,
+} from "@/features/admin/utils/recruitment";
+import { CalendarDays, ArrowRight } from "lucide-react";
 
 interface RecruitmentInfoModalProps {
-    onClose: () => void;
+  onClose: () => void;
 }
 
 export default function RecruitmentInfoModal({ onClose }: RecruitmentInfoModalProps) {
-    const [recruitments, setRecruitments] = useState<RecruitmentResponseDto[]>([]);
-    const [loading, setLoading] = useState(true);
+  const [recruitments, setRecruitments] = useState<RecruitmentResponseDto[]>([]);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        loadRecruitments();
-    }, []);
+  useEffect(() => {
+    loadRecruitments();
+  }, []);
 
-    const loadRecruitments = async () => {
-        try {
-            const data = await recruitmentService.getAll();
-            // Sort by start date specific logic - newest first
-            const sorted = [...data].sort((a, b) => new Date(b.startDateTime).getTime() - new Date(a.startDateTime).getTime());
-            setRecruitments(sorted);
-        } catch (e) {
-            console.error("Failed to load recruitments:", e);
-        } finally {
-            setLoading(false);
-        }
-    };
+  const loadRecruitments = async () => {
+    try {
+      const data = await recruitmentService.getAll(0, 50);
+      const sorted = [...data].sort(
+        (a, b) =>
+          new Date(b.startDateTime).getTime() - new Date(a.startDateTime).getTime()
+      );
+      setRecruitments(sorted);
+    } catch (e) {
+      console.error("Failed to load recruitments:", e);
+      toast.error(getErrorMessage(e, "모집 일정을 불러오지 못했습니다."));
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString() + " " + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    };
+  return (
+    <motion.div
+      initial={{ y: "100%" }}
+      animate={{ y: 0 }}
+      exit={{ y: "100%" }}
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      className="absolute inset-0 lg:inset-auto lg:left-0 lg:bottom-0 lg:w-[66.666%] lg:h-[72%] bg-white z-10 flex flex-col overflow-hidden shadow-2xl border border-neutral-200"
+    >
+      {/* 헤더 */}
+      <div className="px-5 md:px-8 py-4 border-b border-neutral-200 shrink-0 bg-white">
+        <h2 className="text-xl md:text-2xl font-black tracking-tighter text-neutral-900 flex items-center gap-2">
+          <CalendarDays size={22} className="text-purple-600" />
+          모집일정
+        </h2>
+        <span className="text-[10px] font-bold tracking-[0.25em] text-neutral-400 mt-0.5 block">
+          RECRUITMENT SCHEDULE
+        </span>
+      </div>
 
-    const getStatus = (start: string, end: string) => {
-        const now = new Date();
-        const startDate = new Date(start);
-        const endDate = new Date(end);
+      {/* 콘텐츠 */}
+      <div className="flex-1 overflow-y-auto px-5 md:px-8 py-5">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-12 gap-3">
+            <div className="w-5 h-5 border-2 border-neutral-200 border-t-purple-600 rounded-full animate-spin" />
+            <span className="text-sm font-semibold text-neutral-400">불러오는 중...</span>
+          </div>
+        ) : recruitments.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-base font-bold text-neutral-300">
+              현재 등록된 모집 공고가 없습니다.
+            </p>
+          </div>
+        ) : (
+          <div className="divide-y divide-neutral-100">
+            {recruitments.map((recruitment, idx) => {
+              const status = getRecruitmentStatus(
+                recruitment.startDateTime,
+                recruitment.endDateTime,
+                recruitment.status
+              );
 
-        if (now < startDate) {
-            return { label: "모집 예정", color: "bg-blue-100 text-blue-700" };
-        } else if (now >= startDate && now <= endDate) {
-            return { label: "모집 중", color: "bg-green-100 text-green-700" };
-        } else {
-            return { label: "모집 마감", color: "bg-neutral-100 text-neutral-500" };
-        }
-    };
+              return (
+                <motion.div
+                  key={recruitment.id}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    delay: idx * 0.08,
+                    duration: 0.4,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                  className="py-4 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                >
+                  {/* 좌측: 공고 타이틀 및 일정 정보 */}
+                  <div className="space-y-2 min-w-0 flex-1">
+                    <h3 className="text-base md:text-lg font-black tracking-tight text-neutral-900">
+                      {recruitment.title}
+                    </h3>
 
-    // Use createPortal to render the modal outside of the Navbar context
-    // This ensures z-index and positioning work correctly (center on screen)
-    if (typeof document === 'undefined') return null; // Safety check for SSR if needed, though client-side render
+                    {/* 일정 정보: START와 ANNOUNCE를 같은 행에 배치 */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-[10px] font-bold tracking-widest text-neutral-400 w-16 shrink-0">
+                          START
+                        </span>
+                        <span className="font-semibold text-neutral-700">
+                          {formatDateTimeDisplay(recruitment.startDateTime)}
+                        </span>
+                      </div>
 
-    return createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={onClose}
-                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            />
-            <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden max-h-[80vh] flex flex-col pointer-events-auto"
-            >
-                <div className="p-6 border-b border-neutral-100 flex items-center justify-between bg-white sticky top-0 z-10">
-                    <h2 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
-                        <Calendar className="text-purple-600" size={24} />
-                        모집 일정 안내
-                    </h2>
-                    <button
+                      {recruitment.announcementDateTime ? (
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-[10px] font-bold tracking-widest text-purple-600 w-16 shrink-0">
+                            ANNOUNCE
+                          </span>
+                          <span className="font-semibold text-neutral-700">
+                            {formatDateTimeDisplay(recruitment.announcementDateTime)}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="hidden sm:block" />
+                      )}
+
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-[10px] font-bold tracking-widest text-neutral-400 w-16 shrink-0">
+                          END
+                        </span>
+                        <span className="font-semibold text-neutral-700">
+                          {formatDateTimeDisplay(recruitment.endDateTime)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 우측: 상태 버튼 / 텍스트 박스 */}
+                  <div className="shrink-0 pt-1 sm:pt-0">
+                    {status.type === "OPEN" ? (
+                      <Link
+                        to={`/signup?recruitmentId=${recruitment.id}`}
                         onClick={onClose}
-                        className="p-2 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 rounded-full transition-colors"
-                    >
-                        <X size={20} />
-                    </button>
-                </div>
-
-                <div className="p-6 overflow-y-auto">
-                    {loading ? (
-                        <div className="flex flex-col items-center justify-center py-12 gap-3 text-neutral-500">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-                            <p>일정을 불러오는 중입니다...</p>
-                        </div>
-                    ) : recruitments.length === 0 ? (
-                        <div className="text-center py-12 text-neutral-500">
-                            <AlertCircle className="mx-auto mb-3 text-neutral-300" size={48} />
-                            <p>등록된 모집 공고가 없습니다.</p>
-                        </div>
+                        className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-black text-white font-bold text-xs hover:bg-black/85 transition-colors w-24 sm:w-28 text-center"
+                      >
+                        <span>지원하기</span>
+                        <ArrowRight size={13} />
+                      </Link>
+                    ) : status.type === "UPCOMING" ? (
+                      <div className="px-4 py-2 bg-neutral-100 text-neutral-400 border border-neutral-200 font-bold text-xs text-center w-24 sm:w-28 select-none">
+                        모집 예정
+                      </div>
                     ) : (
-                        <div className="space-y-4">
-                            {recruitments.map((recruitment) => {
-                                const status = getStatus(recruitment.startDateTime, recruitment.endDateTime);
-                                return (
-                                    <div
-                                        key={recruitment.id}
-                                        className="border border-neutral-200 rounded-xl p-5 hover:border-purple-200 hover:bg-purple-50/30 transition-all group"
-                                    >
-                                        <div className="flex items-start justify-between mb-3">
-                                            <h3 className="font-bold text-lg text-neutral-900 group-hover:text-purple-700 transition-colors">
-                                                {recruitment.title}
-                                            </h3>
-                                            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${status.color}`}>
-                                                {status.label}
-                                            </span>
-                                        </div>
-
-                                        <div className="space-y-2 text-sm text-neutral-600">
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-16 font-medium text-neutral-500">시작일</div>
-                                                <div className="font-mono text-neutral-700 bg-neutral-100 px-2 py-0.5 rounded">
-                                                    {formatDate(recruitment.startDateTime)}
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-16 font-medium text-neutral-500">종료일</div>
-                                                <div className="font-mono text-neutral-700 bg-neutral-100 px-2 py-0.5 rounded">
-                                                    {formatDate(recruitment.endDateTime)}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                      <div className="px-4 py-2 bg-neutral-100 text-neutral-400 border border-neutral-200 font-bold text-xs text-center w-24 sm:w-28 select-none">
+                        모집 종료
+                      </div>
                     )}
-                </div>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
-                <div className="p-4 border-t border-neutral-100 bg-neutral-50 flex justify-end">
-                    <Button onClick={onClose} variant="brandSoft" size="sm">
-                        닫기
-                    </Button>
-                </div>
-            </motion.div>
-        </div>,
-        document.body
-    );
+      {/* 하단 푸터 */}
+      <div className="flex items-center justify-between px-5 md:px-8 py-3 border-t border-neutral-200 shrink-0 bg-white">
+        <span className="text-[10px] font-bold tracking-[0.25em] text-neutral-300">
+          SOLUTIO NEST
+        </span>
+        <button
+          type="button"
+          onClick={onClose}
+          className="px-4 py-2 bg-black text-white font-bold text-xs hover:bg-black/85 transition-colors"
+        >
+          닫기
+        </button>
+      </div>
+    </motion.div>
+  );
 }

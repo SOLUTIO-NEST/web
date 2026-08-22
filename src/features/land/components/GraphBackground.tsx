@@ -1,9 +1,11 @@
-import { useCallback } from "react";
+import { useCallback, type ComponentProps } from "react";
 import Particles from "react-tsparticles";
 import { loadSlim } from "tsparticles-slim";
 
+type ParticlesInit = NonNullable<ComponentProps<typeof Particles>["init"]>;
+
 export default function GraphBackground() {
-  const init = useCallback(async (engine: any) => {
+  const init = useCallback<ParticlesInit>(async (engine) => {
     await loadSlim(engine); // 가벼운 엔진 로더
     // console.log("tsparticles init"); // 호출 여부 확인용
   }, []);

@@ -18,8 +18,10 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-katex": "^3.1.0",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^7.9.3",
     "react-tsparticles": "^2.12.2",
+    "remark-gfm": "^4.0.1",
     "tsparticles": "^3.9.1",
     "tsparticles-slim": "^2.12.0"
   },

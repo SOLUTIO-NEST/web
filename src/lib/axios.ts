@@ -39,26 +39,19 @@ axiosInstance.interceptors.response.use(
                     throw new Error('No refresh token available');
                 }
 
-                // Call reissue endpoint
                 const response = await axios.post(`${BASE_URL}/login/reissue`, null, {
                     headers: {
                         Authorization: `Bearer ${refreshToken}`,
                     },
                 });
 
-                // Extract new tokens from X-Solutio-Auth header (or body if applicable based on docs)
-                // Docs say: Response Header: X-Solutio-Auth: {"accessToken":"...", "refreshToken":"..."}
-                const authHeader = response.headers['x-solutio-auth'];
-                if (authHeader) {
-                    const tokens = typeof authHeader === 'string' ? JSON.parse(authHeader) : authHeader;
-
+                const tokens = response.data?.data;
+                if (tokens) {
                     localStorage.setItem('accessToken', tokens.accessToken);
                     localStorage.setItem('refreshToken', tokens.refreshToken);
 
-                    // Update authorization header with new access token
                     originalRequest.headers.Authorization = `Bearer ${tokens.accessToken}`;
 
-                    // Retry original request
                     return axiosInstance(originalRequest);
                 }
             } catch (reissueError) {

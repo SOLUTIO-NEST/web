@@ -36,9 +36,9 @@ export default function ResultModal({ isOpen, onClose, status, isLoading }: Resu
                                 <div className="animate-spin rounded-full h-10 w-10 border-4 border-purple-100 border-t-purple-600" />
                             </div>
                         ) : status ? (
-                            status.isPassed === true ? (
+                            status.passStatus === "APPROVED" ? (
                                 <PassedContent status={status} onClose={onClose} />
-                            ) : status.isPassed === false ? (
+                            ) : status.passStatus === "REJECTED" ? (
                                 <FailedContent status={status} onClose={onClose} />
                             ) : (
                                 <PendingContent status={status} onClose={onClose} />
@@ -77,7 +77,7 @@ function PassedContent({ status, onClose }: ContentProps) {
 
             {/* Details */}
             <div className="px-6 py-5 space-y-3 overflow-y-auto flex-1 min-h-0">
-                {status.classLevel && (
+                {status.classLevel && status.classLevel !== "미배정" && (
                     <InfoRow
                         label="배정 반"
                         value={status.classLevel}

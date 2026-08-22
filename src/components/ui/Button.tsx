@@ -38,6 +38,7 @@ export default function Button({
 }: Props) {
   return (
     <button
+      type="button"
       className={`${base} ${variants[variant]} ${sizes[size]} ${className}`}
       {...rest}
     />
